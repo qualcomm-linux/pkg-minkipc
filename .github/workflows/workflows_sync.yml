@@ -1,0 +1,179 @@
+name: Workflows Sync
+description: |
+  Sync workflows from pkg-template back to all repositories that used pkg-template as a template.
+  This workflow executes periodically in the templated repositories in order to keep them up to date
+  with the latest workflows defined in pkg-template.
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        type: boolean
+        default: false
+        required: true
+        description: |
+          Tick to confirm creating pull requests to sync workflows from pkg-template to all repositories that used pkg-template as a template.
+          If not ticked, the workflow will not create any pull requests and will simply print the list of repositories that would have been synced.
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    if: github.event.repository.name == 'pkg-template'
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: pkg-template
+        
+      - name: Sync workflows from pkg-template
+        id: sync
+        env:
+          GH_TOKEN: ${{secrets.DEB_PKG_BOT_CI_TOKEN}}
+          ORG: qualcomm-linux
+          BOT_NAME: ${{vars.DEB_PKG_BOT_CI_NAME}}
+          BOT_EMAIL: ${{vars.DEB_PKG_BOT_CI_EMAIL}}
+          BOT_USERNAME: ${{vars.DEB_PKG_BOT_CI_USERNAME}}
+        run: |
+          # Define explicit list of repositories to exclude
+          EXCLUDE_REPOS=("pkg-template" \
+                         "_pkg-example" \
+                         "pkg-oss-staging-repo" \
+                         "pkg-linux-firmware" \
+                         "pkg-camera-service-temp" \
+                         "pkg-gst-plugins-imsdk-temp" \
+                         "pkg-kernel-fedora" \
+                         "pkg-linux-kernel" )
+          
+          # Array to store created PR URLs
+          PR_URLS=()
+          
+          # Get the list of all repositories that used pkg-template as a template
+          repos=$(gh repo list --limit 9999 $ORG --json name --jq '.[] | select(.name | startswith("pkg-")) | .name')
+
+          echo "List of repositories starting with 'pkg-': $repos"
+
+          # TEST : force the list to just be pkg-fastrpc
+          repos="pkg-example"
+          
+          for repo in $repos; do
+            # Skip excluded repositories
+            if [[ " ${EXCLUDE_REPOS[@]} " =~ " ${repo} " ]]; then
+              echo "⛔ Skipping excluded repository: $repo"
+              continue
+            fi
+            
+            echo "Syncing workflows to $repo"
+
+            # Clone the target repository
+            gh repo clone "$ORG/$repo" "$repo"
+            cd "$repo"
+
+            # Configure git to use gh CLI for authentication
+            gh auth setup-git
+
+            # Delete the sync branch if it exists from a previous run
+            if git ls-remote --exit-code --heads origin sync/pkg-template-workflows > /dev/null 2>&1; then
+              echo "  🧹 Deleting existing sync/pkg-template-workflows branch from remote"
+              git push origin --delete sync/pkg-template-workflows
+            fi
+
+            # Track if changes are needed
+            isDirty=false
+
+            # Special case: Remove workflows_sync.yml if it exists in target repo
+            if [[ -f ".github/workflows/workflows_sync.yml" ]]; then
+              echo "  🗑️  Removing workflows_sync.yml (should not exist in templated repos)"
+              rm ".github/workflows/workflows_sync.yml"
+              isDirty=true
+            fi
+
+            # Compare and sync workflow files
+            for workflow in ../pkg-template/.github/workflows/*.yml; do
+              workflow_name=$(basename "$workflow")
+              
+              # Skip workflows_sync.yml as it's already handled
+              if [[ "$workflow_name" == "workflows_sync.yml" ]]; then
+                continue
+              fi
+              
+              target_workflow=".github/workflows/$workflow_name"
+              
+              if [[ -f "$target_workflow" ]]; then
+                if diff -q "$workflow" "$target_workflow" > /dev/null; then
+                  echo "  ✅ $workflow_name is up to date"
+                else
+                  echo "  ❌ $workflow_name differs from template"
+                  cp "$workflow" "$target_workflow"
+                  isDirty=true
+                fi
+              else
+                echo "  + Creating $workflow_name (missing from $repo)"
+                mkdir -p ".github/workflows"
+                cp "$workflow" "$target_workflow"
+                isDirty=true
+              fi
+            done
+
+            # If no changes needed, skip to next repo
+            if [[ "$isDirty" == "false" ]]; then
+              echo "  ✨ No changes needed for $repo"
+              cd ..
+              continue
+            fi
+
+            # Create branch, commit, and push changes
+            echo "  📝 Creating branch and committing changes"
+            git config user.name "$BOT_NAME"
+            git config user.email "$BOT_EMAIL"
+            git checkout -b sync/pkg-template-workflows
+            git add .github/workflows/
+            git commit -m "chore: sync workflows from pkg-template"
+            
+            # Check if confirmation is enabled
+            if [[ "${{ inputs.confirmation }}" == "true" ]]; then
+              echo "  🚀 Pushing changes and creating PR"
+              git push origin sync/pkg-template-workflows
+              
+              # Create a pull request to sync workflows from pkg-template to the target repository
+              pr_url=$(gh pr create --repo "$ORG/$repo" \
+                --title "chore: sync workflows from pkg-template" \
+                --body "This PR syncs the latest workflows from pkg-template." \
+                --head sync/pkg-template-workflows \
+                --base main)
+              
+              PR_URLS+=("$pr_url")
+              echo "  ✅ PR created: $pr_url"
+            else
+              echo "  👀 Dry-run mode - showing changes that would be pushed:"
+              git diff HEAD~1
+            fi
+            
+            cd ..
+          done
+
+          # Save PR URLs to step output
+          if [[ ${#PR_URLS[@]} -gt 0 ]]; then
+            printf "%s\n" "${PR_URLS[@]}" >> "$GITHUB_OUTPUT"
+            echo "pr_urls<<EOF" >> "$GITHUB_OUTPUT"
+            printf "%s\n" "${PR_URLS[@]}" >> "$GITHUB_OUTPUT"
+            echo "EOF" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Print PR Summary
+        if: steps.sync.outputs.pr_urls != ''
+        run: |
+          echo ""
+          echo "========================================="
+          echo "📋 Summary: Created PR(s)"
+          echo "========================================="
+          echo "${{ steps.sync.outputs.pr_urls }}" | while read -r pr_url; do
+            if [[ -n "$pr_url" ]]; then
+              echo "  🔗 $pr_url"
+            fi
+          done
