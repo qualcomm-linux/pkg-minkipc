@@ -13,7 +13,6 @@ override_dh_auto_configure:
 	cd ../../ && rm -rf qcbor-build
 	dh_auto_configure -- \
 	-DBUILD_MINKTEEC=ON \
-	-DBUILD_UNITTEST=ON \
 	-DSYSTEMD_UNIT_DIR=/usr/lib/systemd/system \
 	-DMINKIPC_LIBEXEC_DIR=/usr/libexec/minkipc \
 	-DUDEV_DIR=/etc/udev/rules.d

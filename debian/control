@@ -27,8 +27,7 @@ Description:
  user space to Trusted Execution Environment—using unforgeable object references and transport
  mechanisms such as SMC, sockets, or TEE IOCTLs.
  .
- This package consists of udev rules, sfs_config script, qteesupplicant binaries and
- test binaries such as smcinvoke_client and gp_test_client.
+ This package consists of udev rules, sfs_config script and qtee_supplicant binaries.
 Depends: ${misc:Depends}, ${shlibs:Depends}
 
 Package: qcom-libminkipc
