@@ -1,5 +1,5 @@
-template-package-name (1.0.0-1) UNRELEASED; urgency=medium
+qcom-minkipc (1.0.0-1) UNRELEASED; urgency=low
 
-  * Populate.
+  * Initial release.
 
- -- Github Service Bot <githubservice@qti.qualcomm.com>  Tue, 07 Oct 2025 14:21:59 -0700
+ -- Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>  Wed, 14 Jan 2026 14:30:00 +0530

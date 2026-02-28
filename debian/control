@@ -1,19 +1,60 @@
-Source: template
-Section: libs
-Priority: optional
-Maintainer: Simon Beaudoin <sbeaudoi@qti.qualcomm.com>
-Build-Depends: debhelper (>= 13)
+Source: qcom-minkipc
+Maintainer: Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>
 Standards-Version: 4.6.2
+Section: misc
+Priority: optional
+Rules-Requires-Root: no
+Build-Depends: debhelper-compat (= 13), cmake, git, qcom-libqcomtee-dev
+Homepage: https://github.com/qualcomm/minkipc
 
-Package: template1
-Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: Template package
- This is an example package to demonstrate the Qualcomm OSS development flow
+Package: qcom-minkipc
+Architecture: arm64
+Description:
+ MinkIPC is Qualcomm’s lightweight capability-based inter-process communication (IPC) framework.
+ It enables secure, synchronous message passing across different security domains—like Linux
+ user space to Trusted Execution Environment—using unforgeable object references and transport
+ mechanisms such as SMC, sockets, or TEE IOCTLs.
+ .
+ This package consists of qteesupplicant.service and sfsconfig.service.
+Depends: ${misc:Depends}, ${shlibs:Depends}
 
-Package: template-dev
+Package: qcom-minkipc-utils
+Architecture: arm64
+Section: utils
+Description:
+ MinkIPC is Qualcomm’s lightweight capability-based inter-process communication (IPC) framework.
+ It enables secure, synchronous message passing across different security domains—like Linux
+ user space to Trusted Execution Environment—using unforgeable object references and transport
+ mechanisms such as SMC, sockets, or TEE IOCTLs.
+ .
+ This package consists of udev rules, sfs_config script, qteesupplicant binaries and
+ test binaries such as smcinvoke_client and gp_test_client.
+Depends: ${misc:Depends}, ${shlibs:Depends}
+
+Package: qcom-libminkipc
+Architecture: arm64
+Section: libs
+Description:
+ MinkIPC is Qualcomm’s lightweight capability-based inter-process communication (IPC) framework.
+ It enables secure, synchronous message passing across different security domains—like Linux
+ user space to Trusted Execution Environment—using unforgeable object references and transport
+ mechanisms such as SMC, sockets, or TEE IOCTLs.
+ .
+ This package consists of minkipc libraries libminkadaptor and libminkteec for enabling 
+ communication for GP based clients and clients like qteesupplicant.service to communicate
+ with QTEE. Additionally it also consists of all the listener service libraries such as 
+ FS, SFS and RPMB.
+Depends: ${misc:Depends}, ${shlibs:Depends}
+
+Package: qcom-libminkipc-dev
+Architecture: arm64
 Section: libdevel
-Architecture: any
-Depends: template1 (= ${binary:Version}), ${misc:Depends}
-Description: Template package dev
- This is an example package to demonstrate the Qualcomm OSS development flow
+Description:
+ MinkIPC is Qualcomm’s lightweight capability-based inter-process communication (IPC) framework.
+ It enables secure, synchronous message passing across different security domains—like Linux
+ user space to Trusted Execution Environment—using unforgeable object references and transport
+ mechanisms such as SMC, sockets, or TEE IOCTLs.
+ .
+ This package contains library headers for the shared libraries shipped in the
+ qcom-libminkipc package.
+Depends: qcom-libminkipc (= ${binary:Version}), ${misc:Depends}

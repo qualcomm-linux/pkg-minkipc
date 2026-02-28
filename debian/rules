@@ -1,4 +1,24 @@
 #!/usr/bin/make -f
 
+# The default target drives the debhelper sequence.
 %:
-	dh $@
+	dh $@ --buildsystem=cmake
+
+override_dh_auto_configure:
+	# Build QCBOR from source
+	mkdir -p qcbor-build
+	cd qcbor-build && \
+        git clone https://github.com/laurencelundblade/QCBOR/ && \
+        cd QCBOR && \
+        cmake . && make && make install && \
+	cd ../../ && rm -rf qcbor-build
+	dh_auto_configure -- \
+        -DBUILD_MINKTEEC=ON \
+	-DBUILD_UNITTEST=ON \
+	-DSYSTEMD_UNIT_DIR=/usr/lib/systemd/system \
+	-DMINKIPC_LIBEXEC_DIR=/usr/libexec/minkipc \
+	-DUDEV_DIR=/etc/udev/rules.d
+
+override_dh_installsystemd:
+	dh_installsystemd --name=qteesupplicant
+	dh_installsystemd --name=sfsonfig
