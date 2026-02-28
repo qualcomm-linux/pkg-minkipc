@@ -16,7 +16,7 @@ Description:
  mechanisms such as SMC, sockets, or TEE IOCTLs.
  .
  This package consists of qteesupplicant.service and sfsconfig.service.
-Depends: ${misc:Depends}, ${shlibs:Depends}
+Depends: qcom-minkipc-utils, qcom-libminkipc, ${misc:Depends}, ${shlibs:Depends}
 
 Package: qcom-minkipc-utils
 Architecture: arm64
