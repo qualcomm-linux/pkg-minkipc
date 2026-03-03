@@ -7,7 +7,7 @@ override_dh_auto_configure:
 	# Build QCBOR from source
 	mkdir -p qcbor-build
 	cd qcbor-build && \
-	git clone https://github.com/laurencelundblade/QCBOR/ && \
+	git clone https://github.com/laurencelundblade/QCBOR/ --depth 1 -b v1.6 && \
 	cd QCBOR && \
 	cmake . && make && make install && \
 	cd ../../ && rm -rf qcbor-build
