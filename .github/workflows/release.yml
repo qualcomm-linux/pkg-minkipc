@@ -17,7 +17,7 @@ on:
           - resolute
           - trixie
           - sid
-         
+
       test-run:
         description: |
           If true, the built packages will be uploaded to the 'test' folder in S3.
