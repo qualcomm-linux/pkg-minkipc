@@ -1,5 +1,9 @@
-qcom-minkipc (1.0.0-1) UNRELEASED; urgency=low
+qcom-minkipc (1.1.1-1) UNRELEASED; urgency=low
 
+  [ Abhinaba Rakshit ]
   * Initial release.
 
- -- Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>  Wed, 14 Jan 2026 14:30:00 +0530
+  [ GitHub Service Bot ]
+  * New upstream release
+
+ -- GitHub Service Bot <githubservice@qti.qualcomm.com>  Tue, 10 Mar 2026 08:57:50 +0000
