@@ -7,11 +7,21 @@ override_dh_auto_configure:
 	# Build QCBOR from source
 	mkdir -p qcbor-build
 	cd qcbor-build && \
-	git clone https://github.com/laurencelundblade/QCBOR/ --depth 1 -b v1.6 && \
+	git clone https://github.com/laurencelundblade/QCBOR.git --depth 1 -b v1.6 && \
 	cd QCBOR && \
 	cmake . && make && make install && \
 	cd ../../ && rm -rf qcbor-build
+	# Build minkidl-compiler
+	rustup default stable
+	mkdir -p mink-idlc
+	cd mink-idlc && \
+	git clone https://github.com/quic/mink-idl-compiler.git --depth 1 -b v0.2.3 && \
+	cd mink-idl-compiler && \
+	cargo build --release && \
+	install -Dm755 target/release/idlc /usr/bin/idlc && \
+	cd ../../ && rm -rf mink-idlc
 	dh_auto_configure -- \
+	-DMINKIDLC_BIN_DIR=/usr/bin \
 	-DSYSTEMD_UNIT_DIR=/usr/lib/systemd/system \
 	-DMINKIPC_LIBEXEC_DIR=/usr/libexec/minkipc \
 	-DUDEV_DIR=/etc/udev/rules.d
