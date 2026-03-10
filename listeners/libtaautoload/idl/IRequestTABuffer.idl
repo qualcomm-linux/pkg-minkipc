@@ -1,0 +1,29 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/**
+ * IRequestTABuffer is the interface that will allow Callback registration
+ * which will return TA Image as Buffer to TZ, when requested by the TZ.
+ */
+ /** @cond */
+interface IRequestTABuffer {
+/** @endcond */
+
+  /**
+   * @addtogroup IRequestTABuffer
+   * @{
+   */
+  /**
+    Return a Memory Object containing the TA binary
+
+    @param[in] UUID  UUID value identifying the TA.
+    @param[out] appElf Returns the TA Buffer as Object.
+
+    @return Object_OK on success.
+  */
+   method get(in buffer uuid, out interface appElf);
+
+  /* @} */ /* end_addtogroup IRequestTABuffer */
+};
+
+

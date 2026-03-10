@@ -1,0 +1,17 @@
+{
+    "QCBOR": {
+        "name": "QCBOR",
+        "repo": "laurencelundblade/QCBOR",
+        "repo-url": "https://github.com/laurencelundblade/QCBOR"
+    },
+    "quic-teec": {
+        "name": "quic-teec",
+        "repo": "quic/quic-teec",
+        "repo-url": "https://github.com/quic/quic-teec"
+    },
+    "minkipc": {
+        "name": "minkipc",
+        "repo": "qualcomm-linux/minkipc",
+        "repo-url": "https://github.com/qualcomm/minkipc"
+    }
+}

@@ -1,0 +1,73 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+interface ITestMemManager {
+  const uint64 TEST_PATTERN1 = 0xFEEDC0DEFACE0001;
+  const uint64 TEST_PATTERN2 = 0xFEEDC0DEFACE0002;
+
+  /**
+   * Tests normal use case, adding mo to the kspace and verify
+   * that that first 8 bytes matches TEST_PATTERN1.
+   *
+   * @note The test pattern will be overwritten using
+   * TEST_PATTERN2 for remote verification
+   */
+  method access(in interface mo);
+
+
+  /**
+   * Tries to add the mo to the kspace with RO permissions,
+   * the mo should have write only permissions for the test to be ok.
+   */
+  method failRead(in interface mo);
+
+  /**
+   * Tries to add the mo to the kspace with W permissions,
+   * the mo should have read only permissions for the test to be ok.
+   */
+  method failWrite(in interface mo);
+
+  /**
+   * Tries to write to the mo region after the mapping has been released,
+   * this will cause an TA abort.
+   *
+   * @note since the TA aborts in the ok use case the test will return
+   * failure in the success case.
+   */
+  method failRelease(in interface mo);
+
+  /**
+   * Adds a 64 bit mo to the kspace, this will succeed or fail depending
+   * on whether the TA is 32 bit or not.
+   *
+   */
+  method fail64Bit(in interface mo);
+
+  /**
+   * Tries to add two overlapping mo to the same kspace
+   */
+  method failOverlap(in interface mo1, in interface mo2);
+  
+  /**
+   * Tests normal use case with two memory objects.
+   * Add memory objects to the kspace and verify
+   * that that first 8 bytes matches TEST_PATTERN1.
+   *
+   * @note The test pattern will be overwritten using
+   * TEST_PATTERN2 for remote verification
+   */
+  method accessTwoMemObjects(in interface mo1, in interface mo2);
+  
+   /**
+   * Tests use case for sending a memory object
+   * without mapping it and releasing it immediately.
+   */
+  method releaseImmediately (in interface mo);
+
+  /**
+   * Intentionally skipping release of map obj to test cleanup sequence
+ 	 * through HYP VM cleanup interface when bSkipUmapMo set true.
+   */
+  method skipUnmapMo(in interface mo, in uint32 bSkipUnmapMo);
+
+};

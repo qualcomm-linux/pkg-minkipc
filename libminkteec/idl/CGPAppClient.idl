@@ -1,0 +1,14 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/**
+* @addtogroup CGPAppClient
+* @{
+  Class CGPAppClient implements \link IGPAppClient \endlink interface.
+  This service is exposed to HLOS client. 
+  This class should be used only by our GP stack, not by individual clients.
+*/
+
+const uint32 CGPAppClient_UID = 0x199;
+
+/** @} */

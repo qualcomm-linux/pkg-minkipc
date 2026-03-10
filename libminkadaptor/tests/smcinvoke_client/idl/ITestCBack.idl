@@ -1,0 +1,87 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+// Basic test interface for callback objects
+
+interface ITestCallable {
+
+   error ERROR_OBJECT_REMOTE;
+   error ERROR;
+
+   method call();
+
+   method callWithBuffer(in buffer arg);
+
+   method callWithBufferOut(out buffer arg1);
+
+   method callWithObject(in interface arg);
+
+   method callGetObject(out interface arg);
+
+   method callGetThreeObjects(out interface arg0, out interface arg1, out interface arg2);
+
+   method callAddInt(in uint32 inVal1, in uint32 inVal2, out uint32 outVal);
+
+   method returnError();
+
+   method callCopyBuffer(in buffer inBuf, out buffer outBuf);
+
+   method callFuncWithBuffer(in buffer arg);
+ 
+   method callWithDelay(out int32 outVal);
+
+   method callGetMemObject(out interface arg);
+   
+   method callGetMemObjectWithBufferIn(out interface arg, in buffer arg1);
+   
+   method callGetMemObjectWithBufferOut(out interface arg, out buffer arg1);
+   
+   method callGetMemObjectWithBufferInAndOut(out interface arg, in buffer arg1, out buffer arg2);
+   
+   method callGetTwoMemObjects(out interface arg, out interface arg1);
+};
+
+
+interface ITestCBack {
+
+   error ERROR_NULL_OBJ;
+   error ERROR_BAD_OUTPUT;
+   error ERROR;
+
+   method set(in ITestCallable callee);
+
+   method callSet();
+
+   method call(in ITestCallable callee);
+
+   method callWithBuffer(in buffer arg, in ITestCallable callee);
+
+   method callWithBufferOut(in ITestCallable callee);
+
+   method callWithObject(in interface arg, in ITestCallable callee);
+
+   method callGetObject(in ITestCallable callee);
+
+   method callGetThreeObjects(in ITestCallable callee);
+
+   method callAddInt(in ITestCallable callee, in uint32 inVal1, in uint32 inVal2, out uint32 outVal);
+
+   method callReturnError(in ITestCallable callee);
+
+   method callCopyBuffer(in buffer inBuf, out buffer outBuf);
+
+   method callFuncWithBuffer(in buffer arg, in ITestCallable callee);
+ 
+   method callWithDelay(in ITestCallable callee, out int32 outVal);
+
+   method callGetMemObject(in ITestCallable callee);
+   
+   method callGetMemObjectWithBufferIn(in buffer arg, in ITestCallable callee);
+   
+   method callGetMemObjectWithBufferOut(in ITestCallable callee);
+   
+   method callGetMemObjectWithBufferInAndOut(in buffer arg, in ITestCallable callee);
+   
+   method callGetTwoMemObjects(in ITestCallable callee);
+};
+
