@@ -1,0 +1,14 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/**
+* Implements IRegisterTABufCBO which is private and intended only for
+* internal use.
+*
+* @addtogroup CRegisterTABufCBO
+* @{
+*/
+
+const uint32 CRegisterTABufCBO_UID = 268;
+
+/** @} */

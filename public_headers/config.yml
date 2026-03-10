@@ -1,0 +1,10 @@
+project: https://github.com/qualcomm/minkipc
+
+branches:
+  main:
+    modes:
+      blocking:
+        headers:
+          - libminkadaptor/include/MinkCom.h
+          - libminkadaptor/include/object.h
+          - libminkteec/include/tee_client_api.h

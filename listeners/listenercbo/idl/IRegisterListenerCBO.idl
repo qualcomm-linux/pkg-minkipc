@@ -1,0 +1,48 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+include "IListenerCBO.idl"
+
+/**
+ * Interface used by REE clients to register callback object listeners into QTEE.
+ */
+ /** @cond */
+ interface IRegisterListenerCBO {
+ /** @endcond */
+
+  /** @cond */
+  /**
+    Error codes
+   */
+  error ERROR_MAX_REGISTERED;                        /**< Max number of listeners already registered */
+  error ERROR_ALIGNMENT;                             /**< Improper alignment on memRegion buffer */
+  error ERROR_ID_IN_USE;                             /**< Listener ID is already registered, unused error code */
+  error ERROR_ID_RESERVED;                           /**< Listener ID is reserved for internal use */
+  error ERROR_REG_NOT_ALLOWED_FROM_CURRENT_VM;       /**< Listener is reserved to be registered by another VM */
+  /** @endcond */
+
+  /**
+   * @addtogroup IRegisterListenerCBO
+   * @{
+   */
+
+  /**
+    Register a CBO-style listener with QTEE.
+
+    Each CBO listener can be associated with a shared memory object.
+    Each CBO implements \link IListenerCBO \endlink .
+
+    @param[in] listenerId  The listener id being registered.
+    @param[in] cbo         The callback object associated with this listener.
+    @param[in] memRegion   The shared memory object associated with this listener.
+                           Can be Object_NULL.
+
+    @return
+    Object_OK on success.
+  */
+  method register (in uint32 listenerId,
+                   in IListenerCBO cbo,
+                   in interface memRegion);
+
+  /* @} */ /* end_addtogroup IRegisterListenerCBO */
+};
