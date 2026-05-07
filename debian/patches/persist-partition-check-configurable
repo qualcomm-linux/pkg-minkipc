@@ -1,0 +1,142 @@
+Description: qtee_supplicant: Make persist partition mount check configurable
+ Introduced CHECK_PERSIST_MOUNTED option to allow distros to disable
+ checking whether persist partition is mounted. This option should always
+ be enabled by default since QTEE always assumes that a separate persist
+ partition is mounted and expects the OS to fail Secure File System
+ operations if this is not the case.
+
+ Only in exceptional circumstances where the platform cannot support a
+ separate persist partition, this option should be disabled. When a separate
+ persist partition is not available, Secure File System listener will create
+ files under a rootfs directory /var/lib/tee created by sfs_config. Using
+ the rootfs to manage Secure File System files has the following associated
+ risks:
+ - File corruption during over-the-air rootfs updates.
+ - File deletion during OS re-installation.
+
+ When file corruption or deletion happens, QTEE will be forced to reset to
+ a clean empty state and forget about the files. Recovery is not possible in
+ these scenarios.
+Author: Harshal Dev <harshal.dev@oss.qualcomm.com>
+Origin: upstream, https://github.com/qualcomm/minkipc/pull/57
+Last-Update: 2026-05-07
+---
+This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
+Index: pkg-minkipc/CMakeLists.txt
+===================================================================
+--- pkg-minkipc.orig/CMakeLists.txt
++++ pkg-minkipc/CMakeLists.txt
+@@ -21,6 +21,8 @@ option(CFG_USE_PKGCONFIG "Use pkg-config
+ # Build RPMB listener
+ option(BUILD_RPMB_LISTENER "Build RPMB Listener" TRUE)
+ 
++option(CHECK_PERSIST_MOUNTED "Check if the persist partition is mounted" TRUE)
++
+ include(GNUInstallDirs)
+ 
+ set(MINKIDLC_BIN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/idlc" CACHE PATH "Directory containing the idlc executable")
+Index: pkg-minkipc/listeners/libfsservice/cmn/helper.c
+===================================================================
+--- pkg-minkipc.orig/listeners/libfsservice/cmn/helper.c
++++ pkg-minkipc/listeners/libfsservice/cmn/helper.c
+@@ -27,6 +27,7 @@ static char *gp_whitelist_paths[] = {
+ 	"/data/qwes/licenses/"
+ };
+ 
++#ifdef CHECK_PERSIST_MOUNTED
+ bool is_persist_partition_mounted(void)
+ {
+ 	bool ret = false;
+@@ -51,6 +52,12 @@ exit:
+ 		endmntent(f);
+ 	return ret;
+ }
++#else
++bool is_persist_partition_mounted(void)
++{
++	return true;
++}
++#endif
+ 
+ int check_dir_path(const char *path)
+ {
+Index: pkg-minkipc/listeners/libfsservice/fs/CMakeLists.txt
+===================================================================
+--- pkg-minkipc.orig/listeners/libfsservice/fs/CMakeLists.txt
++++ pkg-minkipc/listeners/libfsservice/fs/CMakeLists.txt
+@@ -39,6 +39,11 @@ target_include_directories(fsservice
+ 	PRIVATE ../../listenercbo/idl
+ )
+ 
++if(CHECK_PERSIST_MOUNTED)
++        target_compile_definitions(fsservice
++                PRIVATE -DCHECK_PERSIST_MOUNTED)
++endif()
++
+ target_link_libraries(fsservice
+ 	PRIVATE minkadaptor
+ )
+Index: pkg-minkipc/listeners/libfsservice/gpfs/CMakeLists.txt
+===================================================================
+--- pkg-minkipc.orig/listeners/libfsservice/gpfs/CMakeLists.txt
++++ pkg-minkipc/listeners/libfsservice/gpfs/CMakeLists.txt
+@@ -39,6 +39,11 @@ target_include_directories(gpfsservice
+ 	PRIVATE ../../listenercbo/idl
+ )
+ 
++if(CHECK_PERSIST_MOUNTED)
++        target_compile_definitions(gpfsservice
++                PRIVATE -DCHECK_PERSIST_MOUNTED)
++endif()
++
+ target_link_libraries(gpfsservice
+ 	PRIVATE minkadaptor
+ )
+Index: pkg-minkipc/qtee_supplicant/CMakeLists.txt
+===================================================================
+--- pkg-minkipc.orig/qtee_supplicant/CMakeLists.txt
++++ pkg-minkipc/qtee_supplicant/CMakeLists.txt
+@@ -47,7 +47,11 @@ target_link_libraries(${PROJECT_NAME}
+ 
+ install(TARGETS ${PROJECT_NAME} DESTINATION "${CMAKE_INSTALL_BINDIR}")
+ if (DEFINED MINKIPC_LIBEXEC_DIR AND NOT "${MINKIPC_LIBEXEC_DIR}" STREQUAL "")
+-	configure_file(sfs_config.in sfs_config @ONLY)
++	if (CHECK_PERSIST_MOUNTED)
++		configure_file(sfs_config.in sfs_config @ONLY)
++	else()
++		configure_file(sfs_config_omit_persist.in sfs_config @ONLY)
++	endif()
+ 	install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/sfs_config" DESTINATION "${MINKIPC_LIBEXEC_DIR}")
+ endif()
+ if (DEFINED SYSTEMD_UNIT_DIR AND NOT "${SYSTEMD_UNIT_DIR}" STREQUAL "")
+Index: pkg-minkipc/qtee_supplicant/sfs_config_omit_persist.in
+===================================================================
+--- /dev/null
++++ pkg-minkipc/qtee_supplicant/sfs_config_omit_persist.in
+@@ -0,0 +1,26 @@
++#!/bin/sh
++#==============================================================================
++# FILE: sfs_config_omit_persist
++#
++# DESCRIPTION:
++# create files and give permissions to the files and directories needed by
++# secure file system. Omits checking if persist partition is mounted.
++#
++# Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
++# SPDX-License-Identifier: BSD-3-Clause-Clear
++#==============================================================================
++set -e
++
++if [ ! -d /var/lib/tee/qtee_supplicant ]; then
++     echo "Creating /var/lib/tee/qtee_supplicant"
++     mkdir -p /var/lib/tee/qtee_supplicant
++fi
++chmod o+rwx /var/lib/tee/qtee_supplicant
++
++if [ ! -d /var/lib/qtee_supplicant/vendor/tzstorage ]; then
++    echo "Creating /var/lib/qtee_supplicant/vendor/tzstorage"
++    mkdir -p /var/lib/qtee_supplicant/vendor/tzstorage
++fi
++chmod o+rwx /var/lib/qtee_supplicant/vendor/tzstorage
++
++exit 0

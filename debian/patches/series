@@ -1,2 +1,4 @@
+persist-partition-check-configurable
+make-dev-tee0-conditional
 add-libcbor-fallback
 chmod-idlc-on-download
