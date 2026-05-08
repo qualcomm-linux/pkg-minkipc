@@ -1,4 +1,4 @@
-qcom-minkipc (1.1.1-1) UNRELEASED; urgency=low
+qcom-minkipc (1.1.1-1) unstable; urgency=low
 
   [ Abhinaba Rakshit ]
   * Initial release.
@@ -6,4 +6,4 @@ qcom-minkipc (1.1.1-1) UNRELEASED; urgency=low
   [ GitHub Service Bot ]
   * New upstream release
 
- -- GitHub Service Bot <githubservice@qti.qualcomm.com>  Tue, 10 Mar 2026 08:57:50 +0000
+ -- GitHub Service Bot <githubservice@qti.qualcomm.com>  Fri, 08 May 2026 06:59:05 +0000
