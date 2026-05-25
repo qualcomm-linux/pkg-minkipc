@@ -1,3 +1,9 @@
+qcom-minkipc (1.1.1-5~) UNRELEASED; urgency=medium
+
+  * WIP — update changelog before next release
+
+ -- Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>  Mon, 25 May 2026 10:04:33 +0000
+
 qcom-minkipc (1.1.1-4) resolute; urgency=medium
 
   [ Abhinaba Rakshit ]
