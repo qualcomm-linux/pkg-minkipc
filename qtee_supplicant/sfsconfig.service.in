@@ -2,12 +2,14 @@
 # SPDX-License-Identifier: BSD-3-Clause-Clear
 [Unit]
 Description=SFS Configuration Service
-SourcePath=@MINKIPC_LIBEXEC_DIR@/sfs_config
+SourcePath=@CMAKE_INSTALL_FULL_LIBEXECDIR@/sfs_config
+After=@PERSIST_MOUNT_UNIT@
+Wants=@PERSIST_MOUNT_UNIT@
 
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=@MINKIPC_LIBEXEC_DIR@/sfs_config
+ExecStart=@CMAKE_INSTALL_FULL_LIBEXECDIR@/sfs_config
 
 [Install]
 WantedBy=multi-user.target

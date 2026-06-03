@@ -1,0 +1,14 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+/**
+* @addtogroup CIDVService
+* @{
+  Class CIDVService implements \link IIDVService \endlink interface.
+
+  The class ID `IDVService` is not included in the default privilege set. It needs to be added to the
+  privileges section in the metadata to allow the TA to use the CIDVService class.
+*/
+
+const uint32 CIDVService_UID = 238;
+
+/** @} */

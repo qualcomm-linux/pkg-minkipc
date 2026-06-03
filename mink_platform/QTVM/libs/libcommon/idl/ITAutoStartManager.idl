@@ -1,0 +1,29 @@
+/** @file ITAutoStartManager.idl */
+
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/**
+  ITAutoStartManager manage whether the died service need to restart.
+*/
+/** @cond */
+interface ITAutoStartManager {
+/** @endcond */
+
+  /**
+   * @addtogroup ITAutoStartManager
+   * @{
+   */
+
+  /** @cond */
+  /** @endcond */
+
+  /**
+    Notify the ITAutoStartManager that service(cid) has died.
+
+    @return  Object_OK if successful.
+  */
+  method notify(in uint32 cid);
+
+  /** @} */ /* end_addtogroup ITAutoStartManager */
+};

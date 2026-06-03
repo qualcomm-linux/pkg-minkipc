@@ -1,0 +1,49 @@
+/** @file IAVMTestService.idl */
+
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/**
+  IAVMTestService provides interface to register container modules.
+*/
+
+/** @cond */
+interface IAVMTestService
+{
+    /** @endcond */
+
+    /**
+     * @addtogroup IAVMTestService
+     * @{
+     */
+
+    /*
+     * Error codes
+     */
+    /** @cond */
+    error ERROR_NOT_FOUND;         /** Not Found service from LA  */
+    error ERROR_INVALID_PARAMETER; /** Input parameter is invalid. */
+    /** @endcond */
+
+    /* Service Version Numbers. */
+    const uint32 MAXSENDSTRINGLEN = 10240;
+
+    /**
+      QRTR connection test.
+
+      @return  Object_OK if successful.
+     */
+    method open();
+
+    /**
+      QRTR send buffer test.
+
+      @param[in] buff              Buff sended by caller is test strings.
+      @param[out] out              An instance of the requested class.
+
+      @return  Object_OK if successful.
+     */
+    method QRTRSendBuff(in buffer buff, out buffer out);
+
+    /** @} */ /* end_addtogroup IAVMTestService */
+};

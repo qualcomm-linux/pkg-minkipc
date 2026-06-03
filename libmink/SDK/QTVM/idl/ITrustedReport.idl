@@ -1,0 +1,151 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/** @file  ITrustedReport.idl */
+
+include "IDeviceAttestation.idl"
+
+/** @cond */
+interface IRefreshCallback {
+/** @endcond */
+
+  /* IRefreshCallback error code */
+  const uint32 REFRESH_SUCCESS = 0;
+  const uint32 REFRESH_FAILURE = 1;
+  const uint32 REFRESH_TIMEOUT = 2;
+
+/**
+  Gets called by each poked entity when it completes refreshing and
+  it is ready to be requested the desired data.
+  @param[in] status Indication of refresh status, "IRefreshCallback_REFRESH_"
+
+  @return
+  Object_OK on success or IRefreshCallback error code
+*/
+
+  method onResponse(in uint32 status);
+};
+
+/**
+* ITrustedReport provides an interface to communicate between TZ and Modem
+* to receive secure information, e.g. trusted location, trusted time, etc.
+*/
+
+/** @cond */
+interface ITrustedReport {
+/** @endcond */
+
+  /**
+   * @addtogroup ITrustedReport
+   * @{
+   */
+
+  /* Trusted Report Error Codes */
+  error NO_MEMORY;                      /**< Failure during memory allocation */
+  error REPORT_FAILURE;                 /**< Failure during report generation */
+  error RESERVED_2;
+  error INVALID_REPORT_TYPE;            /**< Passed report type is invalid */
+  error RESERVED_3;
+  error RESERVED_4;
+  error INVALID_ARGUMENT;               /**< Invalid arguments. */
+  error NOT_SUPPORTED;                  /**< Not supported. */
+
+  /* Supported custom key types */
+  const uint32 CUSTOM_KEY_TYPE_TMEHW_ATTEST_SIGN = 0; /**< Custom TME HW attestation signing key. */
+
+  /* Supported trusted report types */
+  /* Each new Report type must defined as the previous Report left shifted by one */
+  const uint64 TLOC_REPORT          = 0x0000000000000001;
+  const uint64 QSRP_REPORT          = 0x0000000000000002;
+  const uint64 TTIME_REPORT         = 0x0000000000000004;
+  const uint64 CSR_REPORT           = 0x0000000000000008;
+  const uint64 CDR_REPORT           = 0x0000000000000010;
+  const uint64 SMSR_REPORT          = 0x0000000000000020;
+  const uint64 OEM_REPORT           = 0x0000000000000040;
+  const uint64 GOOGLEBCC_REPORT     = 0x0000000000000080;
+  const uint64 PLATFORMBOOT_REPORT  = 0x0000000000000100;
+  const uint64 HLOSBOOT_REPORT      = 0x0000000000000200;
+  const uint64 SECURITY_REPORT      = 0x0000000000000400;
+  const uint64 TMEHW_REPORT         = 0x0000000000000800;
+
+  /**
+    @brief Get CDDL Fromat for statusReport
+    @param[in]  reportType for secure contents
+    @param[out] status in CBOR, age of the data in cache
+
+    @detdesc
+    Typical use is to get the freshness of when the data in cache
+    was last obtained from modem.
+
+    @return Object_OK on success.
+  */
+  method getStatus(in uint64 reportType, out buffer statusReport);
+
+  /**
+    @brief Get up-to-date data from modem
+    @param[in] reportType for secure contents
+    @param[in] timeout limit for the refresh to complete, currently unused.
+    @param[in] callback object to call when refresh is done.
+
+    @detdesc
+    Typical use is to call refresh before getReport, this is to update cache by
+    fetch latest data from modem
+
+    @return
+    Object_OK on success.
+  */
+  method refresh(in uint64 reportType, in uint64 timeout, in IRefreshCallback callback);
+
+  /**
+    @brief Get CDDL Format for trustedReport
+    @param[in]  reportType for secure contents
+    @param[out] report in CBOR
+
+    @detdesc
+    Generate CBOR report with cache data in QWES TA
+
+    @return
+    Object_OK on success.
+  */
+  method getReport(in uint64 reportType, out buffer report);
+
+  /**
+    Generates a key pair based on the custom keyType.
+
+    @param[in]  keyType     Type of the custom key.
+    @param[in]  inParams    Reserved for future use.
+    @param[out] keyBlob     Buffer containing the key material which is bound to caller and device.
+
+    @return
+    Object_OK on success.
+  */
+  method generateCustomKey(in uint32 keyType, in buffer inParams, out buffer keyBlob);
+
+/**
+    Generates an attestation report that attests to the given custom key.
+
+    @param[in]  licenseCert    Buffer containing license to use attestation feature.
+    @param[in]  keyBlob        Buffer containing the key material.
+    @param[in]  serviceCtx     Bytes that make sense to the 3rd party cloud and is passed along by the QWES cloud back to the 3rd party cloud.
+    @param[out] builder        \link IAttestationBuilder \endlink object to add user data.
+
+    @return
+    Object_OK on success.
+  */
+  method attestToCustomKey(in buffer licenseCert, in buffer keyBlob, in buffer serviceCtx, out IAttestationBuilder builder);
+
+/**
+    Unwraps the key identified by keyBlob and sets the internal key of the
+    trusted report that is identified by keyType.
+
+    @param[in] keyType     Type of the custom key.
+    @param[in] keyBlob     Buffer containing the key material.
+    @param[in] inParams    Reserved for future use.
+
+    @return
+    Object_OK on success.
+  */
+  method setCustomKey(in uint32 keyType, in buffer keyBlob, in buffer inParams);
+
+  /** @} */ /* end_addtogroup ITrustedReport */
+};

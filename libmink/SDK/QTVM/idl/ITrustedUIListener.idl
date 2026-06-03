@@ -1,0 +1,102 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/*===================================================================================
+FILE:  ITrustedUIListener.idl
+
+DESCRIPTION: ITrustedUIListener.idl defines the interface for TUI CoreService
+in TEE to communicate with TUI Listener for any system events and resources.
+=====================================================================================*/
+
+include "ITUICoreServiceHLOSCallback.idl"
+/** @cond */
+interface TrustedUIListener
+/** @endcond */
+{
+   /**
+   * @addtogroup TrustedUIListener
+   * @{
+   */
+
+   /** @cond */
+   /* TrustedUIListener Error Codes */
+    error ERROR_REQUEST_DISPLAY;
+    error ERROR_RETRIVE_DISPLAY;
+    error ERROR_REQUEST_TOUCH;
+    error ERROR_RETRIVE_TOUCH;
+    error ERROR_REQUESTING_RESOURCES;
+    error ERROR_RETRIVING_RESOURCES;
+    error ERROR_ACQUIRE_SYSTEM_RESOURCE;
+    error ERROR_RELEASE_SYSTEM_RESOURCE;
+    error ERROR_REGISTER_SYSTEM_EVENTS;
+    error ERROR_DEREGISTER_SYSTEM_EVENTS;
+    error ERROR_REGISTERING_CALLBACK;
+    error ERROR_DEREGISTERING_CALLBACK;
+   /** @endcond */
+
+  /**
+    Request TUI Resources.
+
+    @param [in] uint32_t displayId Unique Display identifier
+
+    @param [in] uint32_t inputdId Unique Input identifier
+                         (examples: Touch, Power button etc.)
+
+    @return
+    Object_OK on success. Any other error code on failure.
+  */
+  method requestTUIResources(in uint32 displayId, in uint32 inputId);
+
+  /**
+    Retrieve TUI Resources.
+
+    @param [in] uint32_t displayId Unique Display identifier
+
+    @param [in] uint32_t inputId Unique Input identifier
+                         (examples: Touch, Power button etc.)
+
+    @return
+    Object_OK on success. Any other error code on failure.
+  */
+  method retrieveTUIResources(in uint32 displayId, in uint32 inputId);
+
+  /**
+    Request SYSTEM Resources.
+
+    @return
+    Object_OK on success. Any other error code on failure.
+  */
+  method requestSystemResources();
+
+  /**
+    Retrieve SYSTEM Resource.
+
+    @return
+    Object_OK on success. Any other error code on failure.
+  */
+  method retrieveSystemResources();
+
+  /**
+    Register CORE callback object.
+
+    @param [in] TUICoreServiceHLOSCallback CORECbo Callback object to
+    communicate with TUI CoreService in TEE
+
+    @return
+    Object_OK on success. Any other error code on failure.
+  */
+  method registerCallback(in TUICoreServiceHLOSCallback CORECbo);
+
+  /**
+    deregister CORE callback object.
+
+    @param [in] TUICoreServiceHLOSCallback CORECbo Callback object to
+    communicate with TUI CoreService in TEE
+
+    @return
+    Object_OK on success. Any other error code on failure.
+  */
+  method deregisterCallback(in TUICoreServiceHLOSCallback CORECbo);
+
+  /** @} */ /* end_addtogroup TrustedUIRM */
+};

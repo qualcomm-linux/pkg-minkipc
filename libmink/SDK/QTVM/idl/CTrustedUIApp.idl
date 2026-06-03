@@ -1,0 +1,14 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/**
+* @addtogroup CTrustedUIApp
+* @{
+  Class CTrustedUIApp implements \link ITrustedUIApp \endlink interface.
+
+  The class ID `CTrustedUIApp` is a downloadable TA in QTVM.
+*/
+
+const uint32 CTrustedUIApp_UID = 292;
+
+/** @} */

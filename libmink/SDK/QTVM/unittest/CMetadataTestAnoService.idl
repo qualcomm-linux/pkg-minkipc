@@ -1,0 +1,6 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+// Provide another sample service - 'MetadataTestAnoService'
+//   to SecureAppMetadata.py
+const uint32 CMetadataTestAnoService_UID = 0x555;

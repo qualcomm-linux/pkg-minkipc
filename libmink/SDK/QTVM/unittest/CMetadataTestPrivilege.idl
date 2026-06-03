@@ -1,0 +1,6 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+// Provide a sample privilege - 'MetadataTestPrivilege'
+//   to SecureAppMetadata.py
+const uint32 CMetadataTestPrivilege_UID = 666;

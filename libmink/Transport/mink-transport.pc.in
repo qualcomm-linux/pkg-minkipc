@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: mink socket
+Description: minksocket_vendor libraries
+Version: @VERSION@
+Libs: -L${libdir}
+Cflags: -I${includedir}/mink-transport

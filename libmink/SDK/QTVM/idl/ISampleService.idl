@@ -1,0 +1,39 @@
+/** @file  ISampleService.idl */
+
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/**
+  A sample APP.
+*/
+
+include "IMemObject.idl"
+
+/** @cond */
+interface ISampleService {
+/** @endcond */
+
+  /**
+   * @addtogroup ISampleService
+   * @{
+   */
+
+  /*
+   * Error codes
+   */
+  /** @cond */
+  error ERROR_INVALID_BUFFER;                     /**< Buffer is invalid */
+  error ERROR_PROC_NOT_LOADED;                    /**< No loaded TP with distinguished name */
+  /** @endcond */
+
+  method printHello();
+  method getDMABuf();
+  method callQTEETA();
+  method callQTEEKernelService();
+  method shareMemory(in IMemObject memObj);
+  method loadQTEETA(in IMemObject appFileObj);
+  method shareMemWithQTEETA(in uint32 uid);
+  method dumpMemoryUsage(out buffer bufferOut);
+
+  /** @} */ /* end_addtogroup ISampleService */
+};

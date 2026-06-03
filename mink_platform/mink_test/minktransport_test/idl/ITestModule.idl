@@ -1,0 +1,96 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/** @cond */
+interface ITestModule {
+/** @endcond */
+  /**
+   * @addtogroup ITestModule
+   * @{
+   */
+  /** @cond */
+  /** No property was found with the requested index or name */
+  error ERROR_NOT_FOUND;
+
+  /** The buffer provided to receive the name was too small */
+  error ERROR_NAME_SIZE;
+
+  /** The buffer provided to receive the value was too small */
+  error ERROR_VALUE_SIZE;
+  /** @endcond */
+
+  method getTypeId(out uint32 id);
+
+  method getId(out uint32 id);
+
+  method getMultiId(out uint32 id_1,
+                    out uint32 id_2,
+                    out uint32 id_3);
+
+  method setId(in uint32 id);
+
+  method setMultiId(in uint32 id_1,
+                    in uint32 id_2,
+                    in uint32 id_3);
+
+  method setAndGetMultiId(in uint32 id_1,
+                          in uint32 id_2,
+                          in uint32 id_3,
+                          out uint32 id_1,
+                          out uint32 id_2,
+                          out uint32 id_3);
+
+  method getObject(out interface obj);
+
+  method getMultiObject(out interface obj_1,
+                        out interface obj_2,
+                        out interface obj_3);
+
+  method setObject(in interface obj);
+
+  method setMultiObject(in interface obj_1,
+                        in interface obj_2,
+                        in interface obj_3);
+
+  method setAndGetObj(in interface obj_toSend,
+                      out interface obj_toGet);
+
+  method setLocalFdObjAndGet(in interface fdObj,
+                             out interface fdObj_toGet);
+
+  method setMsforwardObjAndGet(in interface mfObj,
+                               out interface mfObj_toGet);
+
+  method unalignedSet(in buffer magic_id_withWrongSize,
+                      in uint32 magic_id_withRightSize,
+                      out uint32 pid);
+
+  method maxArgs(in buffer bi_1, in buffer bi_2, in buffer bi_3, in buffer bi_4, in buffer bi_5,
+                 in buffer bi_6, in buffer bi_7, in buffer bi_8, in buffer bi_9, in buffer bi_10,
+                 in buffer bi_11, in buffer bi_12, in buffer bi_13, in buffer bi_14, in buffer bi_15,
+                 out buffer bo_1, out buffer bo_2, out buffer bo_3, out buffer bo_4, out buffer bo_5,
+                 out buffer bo_6, out buffer bo_7, out buffer bo_8, out buffer bo_9, out buffer bo_10,
+                 out buffer bo_11, out buffer bo_12, out buffer bo_13, out buffer bo_14, out buffer bo_15,
+                 in interface oi_1, in interface oi_2, in interface oi_3, in interface oi_4, in interface oi_5,
+                 in interface oi_6, in interface oi_7, in interface oi_8, in interface oi_9, in interface oi_10,
+                 in interface oi_11, in interface oi_12, in interface oi_13, in interface oi_14, in interface oi_15,
+                 out interface oo_1, out interface oo_2, out interface oo_3, out interface oo_4, out interface oo_5,
+                 out interface oo_6, out interface oo_7, out interface oo_8, out interface oo_9, out interface oo_10,
+                 out interface oo_11, out interface oo_12, out interface oo_13, out interface oo_14, out interface oo_15);
+
+  method echo(in buffer echo_in, out buffer echo_out);
+
+  method bufferOutNull(out buffer null_buffer);
+
+  method objectOutNull(out interface null_obj, out interface obj);
+
+  method overMaxArgs(in buffer bi_1, in buffer bi_2, in buffer bi_3, in buffer bi_4, in buffer bi_5,
+                     in buffer bi_6, in buffer bi_7, in buffer bi_8, in buffer bi_9, in buffer bi_10,
+                     in buffer bi_11, in buffer bi_12, in buffer bi_13, in buffer bi_14, in buffer bi_15, in buffer bi_16);
+
+  method invocationTransferOut(in buffer invocation_in,
+                               out buffer invocation_out,
+                               out interface invocation_obj_out);
+
+    /** @} */ /* end_addtogroup ITestModule */
+};

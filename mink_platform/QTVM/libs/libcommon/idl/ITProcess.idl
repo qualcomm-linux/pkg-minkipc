@@ -1,0 +1,71 @@
+/** @file ITProcess.idl */
+
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+include "IModule.idl"
+
+struct ITProcess_DistID {
+  uint8[32] val;  /** Array of bytes */
+};
+
+/**
+  ITProcess manages TProcess structures in root container.
+*/
+/** @cond */
+interface ITProcess {
+/** @endcond */
+
+  /**
+   * @addtogroup ITProcess
+   * @{
+   */
+
+  /** @cond */
+  /** @endcond */
+
+  /**
+    Unloads a trusted process forcibly.
+
+    @return  Object_OK if successful.
+  */
+  method forceClose();
+
+  /**
+    Store TModule Object into its corresponding TProcss structure.
+
+    @param[in]  tmodObj     TModule Object passed to \link ITPPM \endlink.
+
+    @return  Object_OK -- Successful. \n
+  */
+  method setTModule(in IModule tmodObj);
+
+  /**
+    Get pid from TProcess Object.
+
+    @param[out]  pid     process id stored in TProcess structure.
+
+    @return  Object_OK -- Successful. \n
+  */
+  method getPID(out uint32 pid);
+
+  /**
+    Get parent pid from TProcess Object.
+
+    @param[out]  pid     parent process id stored in TProcess structure.
+
+    @return  Object_OK -- Successful. \n
+  */
+  method getParentPID(out uint32 pid);
+
+  /**
+    Get did from TProcess Object.
+
+    @param[out]  did     distinguished id stored in TProcess structure.
+
+    @return  Object_OK -- Successful. \n
+  */
+  method getDistId(out ITProcess_DistID did);
+
+  /** @} */ /* end_addtogroup ITProcess */
+};

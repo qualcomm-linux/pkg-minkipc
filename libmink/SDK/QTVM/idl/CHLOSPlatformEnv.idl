@@ -1,0 +1,16 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/**
+* @addtogroup CHLOSPlatformEnv
+* @{
+  Class CHLOSPlatformEnv implements \link IHLOSPlatformEnv \endlink interface.
+
+  The class ID `CHLOSPlatformEnv` is a platform service in HLOS Mink daemon.
+*/
+
+// This class provides an interface to get HLOS Platform Env.
+
+const uint32 CHLOSPlatformEnv_UID = 380;
+
+/** @} */

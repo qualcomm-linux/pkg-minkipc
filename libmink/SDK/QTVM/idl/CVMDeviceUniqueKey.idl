@@ -1,0 +1,14 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/**
+* @addtogroup CVMDeviceUniqueKey
+* @{
+  Class CVMDeviceUniqueKey implements \link IVMDeviceUniqueKey \endlink interface.
+
+  The class ID `VMDeviceUniqueKey` is not included in the default privilege set.
+*/
+
+const uint32 CVMDeviceUniqueKey_UID = 345;
+
+/** @} */

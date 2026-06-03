@@ -1,0 +1,21 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/**
+* @addtogroup CC2PAInternetService
+* @{
+  Class CC2PAInternetService implements \link IC2PAInternetService \endlink interface.
+
+  The class ID `CC2PAInternetService` is an service registered with ssgtzd in HLOS.
+*/
+
+/*===================================================================================
+FILE:  CC2PAInternetService.idl
+
+DESCRIPTION:  This file specifies the UID that is used to expose
+internet service for C2PA. This is used by QTVM C2PA service
+to access internet for enrollment.
+
+=====================================================================================*/
+
+const uint32 CC2PAInternetService_UID = 321;

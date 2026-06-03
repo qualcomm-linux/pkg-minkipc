@@ -1,0 +1,6 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+// This class implements the IDiagnostics interface.
+
+const uint32 CDiagnostics_UID = 143;

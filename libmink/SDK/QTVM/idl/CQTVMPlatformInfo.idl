@@ -1,0 +1,17 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/**
+* @addtogroup CQTVMPlatformInfo
+* @{
+  Class CQTVMPlatformInfo implements \link IQTVMPlatformInfo \endlink interface.
+
+  The class ID `QTVMPlatformInfo` is a platform service in Mink daemon.
+*/
+
+// This service provides a method to store and query the envCred of mink daemon.
+//
+
+const uint32 CQTVMPlatformInfo_UID = 370;
+
+/** @} */

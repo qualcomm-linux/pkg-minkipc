@@ -1,0 +1,15 @@
+{
+    "appName": "EmbeddedAllPrivilegeTestService",
+    "neverUnload": "true",
+    "privileges": [
+        "EmbeddedCommonTestService",
+        "EmbeddedNormalDeathTestService",
+        "EmbeddedSpareTestService",
+        "EmbeddedStressTestService",
+        "EmbeddedWrongTestService",
+        "EmbeddedMissingNeverUnload",
+        "AppClient",
+        "VMDeviceUniqueKey"
+    ],
+    "services": ["EmbeddedAllPrivilegeTestService"]
+}

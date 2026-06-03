@@ -1,0 +1,13 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/**
+ * @addtogroup CTCDriverCBService
+ * @{
+   Class CTCDriverCBService implements \link ITCDriverCBService \endlink interface.
+
+   This class provides an interface to protect camera PHY lanes in QSEE
+*/
+const uint32  CTCDriverCBService_UID = 360;
+
+/** @} */

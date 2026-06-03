@@ -46,10 +46,10 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 install(TARGETS ${PROJECT_NAME} DESTINATION "${CMAKE_INSTALL_BINDIR}")
-if (DEFINED MINKIPC_LIBEXEC_DIR AND NOT "${MINKIPC_LIBEXEC_DIR}" STREQUAL "")
-	configure_file(sfs_config.in sfs_config @ONLY)
-	install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/sfs_config" DESTINATION "${MINKIPC_LIBEXEC_DIR}")
-endif()
+
+configure_file(sfs_config.in sfs_config @ONLY)
+install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/sfs_config" DESTINATION "${CMAKE_INSTALL_LIBEXECDIR}")
+
 if (DEFINED SYSTEMD_UNIT_DIR AND NOT "${SYSTEMD_UNIT_DIR}" STREQUAL "")
 	configure_file(qteesupplicant.service.in qteesupplicant.service @ONLY)
 	install(FILES "${CMAKE_CURRENT_BINARY_DIR}/qteesupplicant.service" DESTINATION "${SYSTEMD_UNIT_DIR}")

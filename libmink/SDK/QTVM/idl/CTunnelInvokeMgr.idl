@@ -1,0 +1,16 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/**
+* @addtogroup CTunnelInvokeMgr
+* @{
+  Class CTunnelInvokeMgr implements \link ITunnelInvokeMgr \endlink interface.
+
+  The class ID `CTunnelInvokeMgr` is a platform service in HLOS Mink daemon.
+*/
+
+// This class provides an interface to get Tunnel Invoke Mgr.
+
+const uint32 CTunnelInvokeMgr_UID = 124;
+
+/** @} */

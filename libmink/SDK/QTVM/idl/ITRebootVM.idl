@@ -1,0 +1,35 @@
+/** @file ITRebootVM.idl */
+
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/**
+  ITRebootVM provides an interface to shutdown/reboot VM.
+*/
+
+/** @cond */
+interface ITRebootVM {
+/** @endcond */
+
+  /**
+   * @addtogroup ITPowerService
+   * @{
+   */
+
+  /*
+   * Error codes
+   */
+  /** @cond */
+  error ERROR_CANT_SHUTDOWN_GRACEFUL;
+
+  /** @endcond */
+
+  /**
+    @ try to shutdown/restart qtvm
+    @ return  Object_OK if successful.
+   */
+  method shutdown(in uint32 restart, in uint32 force);
+
+  /** @} */ /* end_addtogroup ITPowerService */
+
+};

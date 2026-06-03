@@ -1,0 +1,142 @@
+/** @file  ITestService.idl */
+
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/**
+  A test APP.
+*/
+
+/** @cond */
+interface ITestService
+{
+    /** @endcond */
+
+    /**
+     * @addtogroup ITestService
+     * @{
+     */
+
+    /*
+     * Error codes
+     */
+    /** @cond */
+    error ERROR_INVALID_BUFFER;  /**< Buffer is invalid */
+    error ERROR_PROC_NOT_LOADED; /**< No loaded TP with distinguished name */
+    /** @endcond */
+
+    /* Test Mode. */
+    const uint32 POSITIVETEST = 0;
+    const uint32 NEGATIVETEST = 1;
+    const uint32 STRESSTEST = 2;
+
+    method printHello();
+
+    method wakeLockTest(in uint32 cmdId);
+
+    method raiseSignal(in int32 sigNum);
+
+    method backtracetest(in uint32 signalNum);
+
+    method callService(in uint32 targetUid);
+
+    method checkCredentials();
+
+    method appendCredentials();
+
+    method parallelCallSameService();
+
+    method parallelCallDiffService();
+
+    method dequeueBuffer(in uint32 bufSize, out interface objOut);
+
+    method reclaimBufferTest();
+
+    method enqueueBuffer(in uint32 bufSize, in interface objOut);
+
+    method runMemSharingTest(in uint32 targetUid);
+
+    method shareMemoryBuffer(in uint32 blockedMS, in uint32 bufSize, in interface memObj);
+
+    method lendMemoryBufferNoUnmap(in uint32 blockedMS, in uint32 bufSize, in interface memObj);
+
+    method furtherShareMemoryBuffer(in uint32 bufSize, in uint32 targetUid, in interface memObj);
+
+    method testLocalMemoryService();
+
+    method registerNotifyCB(in interface obj);
+
+    method callNotifyCB();
+
+    method getAppObject(in buffer name);
+
+    method deriveKey(out buffer deriveKey);
+
+    method positiveOpenEmbeddedService();
+
+    method positiveMemSharing(in uint32 targetUid);
+
+    method positiveTestMemoryService(in uint32 targetUid);
+
+    method positiveEmbeddedCallEmbedded();
+
+    method positiveProcessAbnormalDeath();
+
+    method positiveReclaimBufferTest();
+
+    method positiveEmbeddedServiceWakeLockTest();
+
+    method positiveQTVMWakeLockTest();
+
+    method positiveMultipleWakeLockTest();
+
+    method positiveAutoStartCoreService();
+
+    method positiveRestartEmbeddedAutoStartService();
+
+    method negativeOpenServiceNotPrivileged();
+
+    method negativeEmbeddedMissingNeverUnload();
+
+    method negativeEmbeddedRetryLimit();
+
+    method stressMultiPoolsSameTAsMemSharing(in uint32 uid);
+
+    method stressMultiPoolsDiffTAsMemSharing(in buffer uidList);
+
+    method stressProcessAbnormalDeath();
+
+    method stressLoadSameEmbeddedProc();
+
+    method stressLoadDiffEmbeddedProc();
+
+    method stressEmbeddedNormalDeath();
+
+    method stressAcquireWakeLock();
+
+    method shutdown(in int8 bWaitForSIGCONT);
+
+    method queryCred(out interface obj);
+
+    method queryTACred(in uint32 uid);
+
+    method setRunningVM(in uint32 vmType);
+
+    method passCredToQTEE();
+
+    method simpleShareMemoryBuffer(in uint64 bufSize, in interface memObj);
+
+    method QTVMAllocMemory(in uint64 poolSize);
+
+    method QTVM2TZtest(in interface memObj);
+
+    method QRTRConn(in uint32 TestType);
+
+    method localPlatformInfoTest();
+
+    method simpleShareCopyBuffer(in buffer echo_in, out buffer echo_out);
+
+    method checkAccessPermissions(in buffer confRules, in interface memObj);
+
+  /** @} */ /* end_addtogroup ITestService */
+};

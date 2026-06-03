@@ -8,3 +8,11 @@ branches:
           - libminkadaptor/include/MinkCom.h
           - libminkadaptor/include/object.h
           - libminkteec/include/tee_client_api.h
+
+abi_checks:
+  - path: MINKIPC_LIBS/usr/local/lib
+    include_globs: ["libminkadaptor.so", "libminkteec.so"]
+    public_headers:
+      - libminkadaptor/include/MinkCom.h
+      - libminkadaptor/include/object.h
+      - libminkteec/include/tee_client_api.h

@@ -1,0 +1,82 @@
+/** @file ITPrivilegedProcessManager.idl */
+
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+include "ITAutoStartManager.idl"
+include "ITProcess.idl"
+include "ITProcessController.idl"
+
+/**
+  ITPPM forks new process.
+*/
+
+struct ITPPM_programData {
+    uint32 neverUnload;
+    uint32 flags;
+    uint64 offset;
+    uint64 fileSize;
+    uint8[256] fileName;
+};
+
+/** @cond */
+interface ITPPM {
+/** @endcond */
+
+  /**
+   * @addtogroup ITPrivilegedProcessManager
+   * @{
+   */
+
+  /*
+   * Error codes
+   */
+  /** @cond */
+  error ERROR_INVALID_BUFFER;                     /**< Buffer is invalid */
+  error ERROR_PROC_ALREADY_LOADED;                /**< TP with distinguished name is loaded */
+  error ERROR_PROC_NOT_LOADED;                    /**< No loaded TP with distinguished name */
+  error ERROR_HEAP_MALLOC_FAILURE;                /**< TP loading failed due to heap exhaustion */
+  /** @endcond */
+
+  /**
+    Loads a trusted process.
+    The process ELF binary is passed as a memory object.
+
+    @param[in]  memObj         Buffer containing ELF image.
+    @param[in]  cid            Container ID.
+    @param[in]  did            Distinguished ID.
+    @param[in]  programData    program data like neverUnload.
+    @param[out] pid            ID of launched process.
+    @param[out] tProcCtrlObj   An instance of process controller.
+                               TProcess Controller Object return to client, can
+                               be released using Object_Release() or
+                               Object_RELEASE_IF().
+
+    @param[out] tProcObj       An instance of a launched process.
+                               TProcess is a private Object return to TProcess
+                               Controller, can be released using
+                               Object_Release() or Object_RELEASE_IF().
+
+    @return  Object_OK if successful.
+    @return  Object_ERROR_MEM Any memory error occurred.
+  */
+  method launch(in interface memObj, in uint32 cid, in ITProcess_DistID did, in ITPPM_programData programData, out uint32 pid, out ITProcessController tProcCtrlObj, out ITProcess tProcObj);
+
+  /**
+    register the Notify Object.
+
+    @param[in]  notify       Notify object that will be called when process died.
+  */
+  method registerNotify(in ITAutoStartManager notify);
+
+  /**
+    try to shutdown/restart qtvm.
+    @param[in] restart       indicate reboot or shutdown.A non-zero value indicates to reboot the VM.
+    @param[in] force         A non-zero value indicates to force reboot/shutdown the VM
+                             regardless of whether the service is running.
+    @return  shutdown/restart if successful.
+   */
+  method shutdown(in uint32 restart, in uint32 force);
+
+  /** @} */ /* end_addtogroup ITPPM */
+};

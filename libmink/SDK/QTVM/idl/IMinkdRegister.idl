@@ -1,0 +1,38 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/*================================================================
+FILE: IMinkdRegister.idl
+
+DESCRIPTION: IMinkdRegister.idl defines the interface for client register service
+to Mink Hub that other EEs can discover this service.
+=================================================================*/
+
+/** @cond */
+interface IMinkdRegister
+/** @endcond */
+{
+    /**
+     *@addtogroup IMinkdRegister
+     *@{
+     */
+
+    /**
+      Register service to Mink Hub.
+
+      @param[in] uidList               Array of Mink services/UIDs hosted within corresponding
+                                       IModule.
+
+      @param[in] IModule               Mink module used to open hosted services. Must implement
+                                       \link IModule \endlink interface.
+
+      @return
+      Object_OK on success.
+    */
+    method registerServices(in uint32[] uidList, in interface IModule);
+
+    /**
+     *end_addtogroup IMinkdRegister
+     *@}
+     */
+};

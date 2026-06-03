@@ -1,0 +1,345 @@
+/** @file IKMHal.idl  */
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+include "IMemRegion.idl"
+
+interface IKMHal {
+  /**
+   * @addtogroup IKMHal
+   * @{
+   */
+
+  /**
+   Interface exposes KM HAL API's to TA clients.
+   Commands are serialized in a packed structure
+   with defined types and variable length blobs have the
+   corresponding offset from the top of the struct and
+   the size. Responses are serialized in packed structs
+   with the first 4 bytes as the status.
+
+   This interface supports KM4.
+
+   !!! Do not use this interface for any other use case,
+   this is temporary until MINK supports arrays of
+   structs. This method will be deprecated. !!!
+
+   @param[in]  input    Request buffer.
+   @param[out] output   Response buffer.
+
+   @return
+   Object_OK on success. \n
+   Error or negative value on failure is populated in the output buffer.
+   */
+  method sendCmd(in buffer input, out buffer output);
+
+  /**
+   Interface to get the per-boot auth token key. This is
+   the 256-bit shared HMAC key used to mint auth tokens for user
+   authentication.
+
+   Data format of auth token can be found here:
+   https://android.googlesource.com/platform/hardware/libhardware/+/master/include/hardware/hw_auth_token.h
+   HMAC is computed over all the fields mentioned in the format
+   except hmac and the computed hmac is stored in the hmac field.
+
+   To be used only by biometric and confirmation
+   UI TA's.
+
+   @param[out] output   Response buffer.
+
+   @return
+   Object_OK on success. \n
+   Object_ERROR_SIZE_OUT if output length is less than required length.
+   Object_ERROR or negative value on failure.
+   */
+  method getAuthTokenKey256(out buffer output);
+
+  /**
+   Interface to get the pre shared key used to compute the
+   per boot auth token key. This key is derived in keymaster
+   using the hardware key.
+   More details on the exact derivation scheme can be found
+   here: https://android.googlesource.com/platform/hardware/interfaces/+/master/keymaster/4.0/IKeymasterDevice.hal.
+
+   @param[out] output   Response buffer.
+
+   @return
+   Object_OK on success. \n
+   Object_ERROR or negative value on failure.
+   */
+  method getPreSharedKey256(out buffer output);
+
+  /**
+   Interface to get the bootloader lock status.
+   Output is 1 if bootloader status is locked.
+   Similarly, it is 0 if bootloader status is unlocked.
+
+   @param[out] output   Response value.
+
+   @return
+   Object_OK on success. \n
+   Object_ERROR or negative value on failure.
+   */
+  method isBootloaderLocked(out uint32 output);
+
+  /**
+   Interface to validate that the leafCert chains up to the rootCert.
+   Certs can either be RSA (2048, 3072, 4096) or ECC (p224, 256, 384. 521).
+
+   @param[in]   leaf_cert   Leaf certificate.
+   @param[in]   root_cert   Root certificate.
+
+   @return
+   Object_OK on success. \n
+   Object_ERROR or negative value on failure.
+   */
+  method validateCerts(in buffer leaf_cert, in buffer root_cert);
+
+  /**
+   Interface to get Identity Credential Attestation Certificate.
+   ECC (256).
+
+   @param[in]  att_challenge   Attestation challenge.
+   @param[in]  att_appid       Attestation app id.
+   @param[in]  pubkey          Public key.
+   @param[in]  cred            Credentials.
+   @param[in]  tm_sec          Time in seconds.
+   @param[in]  tm_min          Time in minutes.
+   @param[in]  tm_hour         Time in hour.
+   @param[in]  tm_mday         Day.
+   @param[in]  tm_mon          Month.
+   @param[in]  tm_year         Year.
+   @param[out] cert_chain   Certificate chain.
+
+   @return
+   Object_OK on success. \n
+   Object_ERROR or negative value on failure.
+   */
+  method getIdentityCredAttestation(in buffer att_challenge, in buffer att_appid,
+                                    in buffer pubkey, in uint8 cred,
+                                    in uint32 tm_sec, in uint32 tm_min,
+                                    in uint32 tm_hour, in uint32 tm_mday,
+                                    in uint32 tm_mon, in uint32 tm_year,
+                                    out buffer cert_chain);
+
+  /**
+   Interface to get public key from the given Certificate.
+   Input: Certifiacte
+   Output: Public key
+
+   @param[in]  certificate    Certificate
+   @param[out] public_key      Public Key
+
+   @return
+   Object_OK on success. \n
+   Object_ERROR or negative value on failure.
+   */
+  method getCertificatePublicKey(in buffer certificate, out buffer public_key);
+
+  /**
+   Interface to generate X509 Certificate.
+   Input: encoded_x509Cert_input
+   Output: X509 Certificate
+
+   @param[in]  encoded_x509Cert_input  Encoded certificate input.
+   @param[out] x509Certificate         x509 Certificate.
+
+   @return
+   Object_OK on success. \n
+   Object_ERROR or negative value on failure.
+   */
+  method getX509Certificate(in buffer encoded_x509Cert_input, out buffer x509Certificate);
+
+   /**
+   Interface to generate Ecc Private Key DER format(RFC 5915.).
+   Input: privatekey, publickey
+   Output: Private Key DER format
+
+   @param[in]  public_key    Public key.
+   @param[in]  private_key   Private key.
+   @param[out] privKey_der   Private key DER format.
+
+   @return
+   Object_OK on success. \n
+   Object_ERROR or negative value on failure.
+   */
+  method getEccprivKey_der(in buffer public_key, in buffer private_key, out buffer privKey_der);
+
+  /**
+  Interface to get various device specific information, which includes the below fields
+  in sequence as a CBOR encoded map.
+          ? "brand" : tstr,
+          ? "manufacturer" : tstr,
+          ? "product" : tstr,
+          ? "model" : tstr,
+          ? "board" : tstr,
+          ? "vb_state" : "green" / "yellow" / "orange",    // Taken from the AVB values
+          ? "bootloader_state" : "locked" / "unlocked",    // Taken from the AVB values
+          ? "os_version" : tstr,                    // Same as android.os.Build.VERSION.release
+          ? "system_patch_level" : uint,                   // YYYYMMDD
+          ? "boot_patch_level" : uint,                     // YYYYMMDD
+          ? "vendor_patch_level" : uint,                   // YYYYMMDD
+
+   @param[in]  options   Input options.
+   @param[out] info      CBOR encoded map with device info.
+
+   @return
+   Object_OK on success. \n
+   Object_ERROR or negative value on failure.
+  */
+  method getDeviceInfo(in uint64 options, out buffer info);
+
+ /**
+  Interface to get the OS boot measurements which include
+  root of trust, hash of verified boot public key, and the
+  verified boot hash, encoded in the form of a CBOR map as below.
+  rot_hash => bstr,
+  public_key_hash => bstr,
+  vbmeta_hash => bstr
+
+   @param[out] options   Input options.
+   @param[out] info      CBOR encoded map with boot info.
+
+   @return
+   Object_OK on success. \n
+   Object_ERROR or negative value on failure.
+  */
+  method getOSBootMeasurementsInfo(in uint64 options, out buffer info);
+
+ /**
+	Interface to verify X509 Certificate.
+
+   @param[in] x509Cert   Certificate.
+   @param[in] publicKey  Public Key.
+   @param[out] value     Success or Failure.
+
+   @return
+   Object_OK on success.
+   Object_ERROR or negative value on failure.
+  */
+  method x509Verify(in buffer x509Cert, in buffer publicKey, out uint8 value);
+
+  /**
+   Interface to re-provision DeviceID parameters.
+   "allow_reprovision_device_ids" must be enabled in devcfg.
+
+   @param device
+   @param brand
+   @param model
+   @param product
+   @param manufacturer
+   @param serial
+   @param imei
+   @param meid
+
+   @return
+   Object_OK on success.
+   Object_ERROR or negative value on failure.
+   */
+  method provisionDeviceIds(in buffer device,
+                            in buffer brand,
+                            in buffer model,
+                            in buffer product,
+                            in buffer manufacturer,
+                            in buffer serial,
+                            in buffer imei,
+                            in buffer meid);
+
+/**
+ Send a request to a TA.
+    One shared memory object can accompany the request.
+
+    @param[in]  reqIn    Request buffer
+    @param[out] rspOut   Response buffer, will contain data written by TA
+    @param[in]  smo1     Shared memory object 1
+
+    @return
+    Object_OK on success. \n
+    Error or negative value on failure is populated in the output buffer.
+  */
+  method sendRequestWithMemoryObjs(in buffer reqIn,
+                     out buffer rspOut,
+                     in IMemRegion smo1);
+
+  /**
+   Interface to sign a message using the Keymint BCC private key.
+
+   @param[in] msg Message to be signed by Keymint BCC.
+   @param[out] signature Message signed by Keymint BCC.
+
+   @return
+   Object_OK on success.
+   Object_ERROR on failure.
+   */
+   method sign(in buffer msg, out buffer signature);
+
+   /**
+   Interface to get the Boot Chain Certificate size provided by KM.
+
+   Method only to be used by the Widevine TA.
+   This method must be called before using getKMBCCInfo().
+
+   @param[out] bcc_size Size of the Boot Chain Certificate
+
+   @return
+   Object_OK on success.
+   Object_ERROR on failure.
+   */
+   method getBCCSize(out uint64 bcc_size);
+
+  /**
+   Interface to get the Boot Chain Certificate (BCC) provided by KM.
+
+   Method only to be used by Widevine TA.
+
+   @param[out] bcc Boot Chain certificate
+
+   @return
+   Object_OK on success.
+   Object_ERROR on failure.
+   */
+   method getKMBCCInfo(out buffer bcc);
+
+  /**
+   Get the BCC-derived Widevine signing key.
+
+     @param[out] wvBCCKey Widevine-BCC Signing Key
+
+     @return
+     Object_OK on success. \n
+     Object_ERROR on failure.
+   */
+   method getWVBCCKey(out interface wvBCCKey);
+
+  /**
+   Interface to provision DeviceID parameters with dual IMEI support.
+   "allow_reprovision_device_ids" must be enabled in devcfg to reprovision the device ids.
+
+   @param[in] device         re-provision the device id
+   @param[in] brand          re-provision the brand name
+   @param[in] model          re-provision the model number
+   @param[in] product        re-provision the product id
+   @param[in] manufacturer   re-provision the manufacturer name
+   @param[in] serial         re-provision the serial number
+   @param[in] imei           re-provision the imei1 number
+   @param[in] imei           re-provision the imei2 number
+   @param[in] meid           re-provision the meid1 number
+   @param[in] meid2          re-provision the meid2 number
+   @return
+   Object_OK on success.
+   Object_ERROR on failure.
+   */
+   method provisionDeviceIdsWithDualImei(in buffer device,
+                                        in buffer brand,
+                                        in buffer model,
+                                        in buffer product,
+                                        in buffer manufacturer,
+                                        in buffer serial,
+                                        in buffer imei,
+                                        in buffer imei2,
+                                        in buffer meid,
+                                        in buffer meid2);
+
+   /** @} */ /* end_addtogroup IKMHal */
+};

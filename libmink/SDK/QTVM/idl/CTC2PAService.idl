@@ -1,0 +1,21 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/**
+* @addtogroup CTC2PAService
+* @{
+  Class CTC2PAService implements \link ITC2PAService \endlink interface.
+
+  The class ID `CTC2PAService` is an embedded service in QTVM.
+*/
+
+/*===================================================================================
+FILE:  CTC2PAService.idl
+
+DESCRIPTION:  This file specifies the UID that is used to expose
+C2PA service in QTVM. This can used by HLOS or other QTVM services
+to provide support for media provenance and authenticity.
+
+=====================================================================================*/
+
+const uint32 CTC2PAService_UID = 311;

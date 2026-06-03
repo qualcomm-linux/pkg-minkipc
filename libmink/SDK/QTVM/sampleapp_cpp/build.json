@@ -1,0 +1,19 @@
+{
+    "includes": [
+        "./inc"
+    ],
+    "sources": [
+        "src/main.cpp",
+        "src/CSampleService.cpp",
+        "src/Metadata.json"
+    ],
+    "staticLibsWholeArchive": [
+
+    ],
+    "staticLibsNoWholeArchive": [
+
+    ],
+    "dynamicLibs": [
+
+    ]
+}

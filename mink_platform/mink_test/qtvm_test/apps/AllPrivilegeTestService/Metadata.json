@@ -1,0 +1,22 @@
+{
+    "appName": "AllPrivilegeTestService",
+    "privileges": [
+        "CommonTestService",
+        "CredDealerTestService",
+        "SpareTestService",
+        "StressTestService",
+        "EmbeddedAllPrivilegeTestService",
+        "EmbeddedCommonTestService",
+        "EmbeddedStressTestService",
+        "EmbeddedNormalDeathTestService",
+        "EmbeddedSpareTestService",
+        "EmbeddedWrongTestService",
+        "AppClient",
+        "VMDeviceUniqueKey",
+        "TPowerService",
+        "AppLoader",
+        "AVMCommonTestService",
+        "AVMStressTestService"
+    ],
+    "services": ["AllPrivilegeTestService"]
+}

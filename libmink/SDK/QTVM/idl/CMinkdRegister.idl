@@ -1,0 +1,16 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/**
+* @addtogroup CMinkdRegister
+* @{
+  Class CMinkdRegister implements \link IMinkdRegister \endlink interface.
+
+  The class ID `CMinkdRegister` is a registeration service in HLOS Mink daemon.
+*/
+
+// This class provides an interface to register a service to HHLOS Mink daemon.
+
+const uint32 CMinkdRegister_UID = 317;
+
+/** @} */

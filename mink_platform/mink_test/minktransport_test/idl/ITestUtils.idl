@@ -1,0 +1,37 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/** @cond */
+interface ITestUtils {
+/** @endcond */
+  /**
+   * @addtogroup ITestUtils
+   * @{
+   */
+  /** @cond */
+  /** No property was found with the requested index or name */
+  error ERROR_NOT_FOUND;
+
+  /** The buffer provided to receive the name was too small */
+  error ERROR_NAME_SIZE;
+
+  /** The buffer provided to receive the value was too small */
+  error ERROR_VALUE_SIZE;
+  /** @endcond */
+
+  method getTypeId(out uint32 id);
+
+  method bufferEcho(in buffer echo_in,
+                    out buffer echo_out);
+
+  method bufferPlus(in uint32 value_a,
+                    in uint32 value_b,
+                    out uint32 value_sum);
+
+  method invocationTransfer(in buffer invocation_in,
+                            in interface invocetion_obj_in,
+                            out buffer invocation_out,
+                            out interface invocation_obj_out);
+
+  /** @} */ /* end_addtogroup ITestUtils */
+};

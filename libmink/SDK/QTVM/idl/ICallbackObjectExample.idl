@@ -1,0 +1,31 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/**
+ * ICallbackObjectExample demonstrates how we can implement a callback interface in the CA,
+ * and use it from the TA to call code in the CA.
+ */
+
+/** @cond */
+interface ICallbackObjectExample
+{
+  /** @endcond */
+
+  /**
+   * @addtogroup ICallbackObjectExample
+   * @{
+   */
+
+  /**
+      Print a message to stdout.
+
+      @param[in] msg Message to print to stdout. Must be null-terminated.
+
+      @return
+      Object_OK on success.
+  */
+
+  method print(in buffer msg);
+
+  /* @} */ /* end_addtogroup ICallbackObjectExample */
+};

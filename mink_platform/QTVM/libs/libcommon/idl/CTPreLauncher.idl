@@ -1,0 +1,18 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/**
+* @addtogroup CTPreLauncher
+* @{
+  Class CTPreLauncher implements \link ITPreLauncher \endlink interface.
+
+  The class ID `TPreLauncher` is not included in the default privilege set. It only provides service
+  to Mink daemon and it can communicate only to TPrivilegedProcessManager.
+*/
+
+// This class provides an interface to preload Trusted Processes in QTVM container.
+//
+
+const uint32 CTPreLauncher_UID = 329;
+
+/** @} */

@@ -1,0 +1,42 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/** @file  IQWESTAServices.idl */
+
+include "ITrustedReport.idl"
+
+/** @cond */
+interface IQWESTAServices {
+/** @endcond */
+
+  /** @cond */
+
+  /**
+   * QWES TA Service ID
+   */
+  const uint32 PLATFORM_FEATURE_MANAGER    = 1;
+  const uint32 DEVICE_ATTESTATION          = 2;
+  const uint32 TRUSTED_REPORT              = 3;
+  const uint32 SECURE_PROVISIONING         = 4;
+  const uint32 QWES_KEYSTORE               = 5;
+  const uint32 QWES_CONFIG                 = 6;
+
+  /** @endcond */
+
+  /**
+   * @addtogroup IQWESTAServices
+   * @{
+   */
+
+  /** Returns service interface
+    @param[in]  license          Buffer containing license to check feature IDs.
+    @param[in]  serviceId        QWES TA service ID
+    @param[out] service          Interface to get service from QWES TA.
+
+    @return
+    Object_OK on success.
+  */
+  method createServiceById(in buffer license, in uint32 serviceId, out interface service);
+
+  /* @} */ /* end_addtogroup IQWESTAServices */
+};

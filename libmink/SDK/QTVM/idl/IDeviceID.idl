@@ -1,0 +1,167 @@
+/** @file  IDeviceID.idl */
+
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/** @cond */
+interface IDeviceID {
+/** @endcond */
+
+  /** @cond */
+  const uint32 BOOT_ROM_VERSION = 1;
+  const uint32 SBL_VERSION      = 2;
+  const uint32 QSEE_VERSION     = 3;
+  const uint32 HYP_VERSION      = 4;
+  const uint32 TME_VERSION      = 5;
+  /** @endcond */
+
+  /**
+   * @addtogroup IDeviceID
+   * @{
+   */
+
+  /**
+    Reads JTAG ID.
+
+    @param[out] jtagId  ID from the JTAG.
+
+    @return
+    - Generic errors: List of generic errors can be checked from TA development guide.
+      - Object_OK if successful.
+    - Interface errors: NA
+  */
+  method readJtagID(out uint32 jtagId);
+
+  /**
+    Reads serial number from PTE chain.
+
+    @param[out] serialNum  Device serial number.
+
+    @return
+    - Generic errors: List of generic errors can be checked from TA development guide.
+      - Object_OK if successful.
+    - Interface errors: NA
+  */
+  method readSerialNum(out uint64 serialNum);
+
+  /**
+    Returns a globally-unique ID identifying this device.
+
+    @param[out] uuid  UUID in native byte order.
+
+    @return
+    - Generic errors: List of generic errors can be checked from TA development guide.
+      - Object_OK if successful.
+      - Object_ERROR if failure.
+    - Interface errors: NA
+  */
+  method getDeviceUUID(out buffer uuid);
+
+  /**
+    Returns a buffer identifying the version of the component
+    executing on this device.
+
+    @param[in]  componentId   Component identifier.
+                Valid value must belong to enum category: image_index_type.
+    @param[out] versionBuffer Componet version buffer.
+
+    @detdesc
+    These buffers are printable ASCII strings, but are not NULL-terminated. The
+    maximum buffer size is 128 bytes.
+
+    @return
+    - Generic errors: List of generic errors can be checked from TA development guide.
+      - Object_OK if successful.
+      - Object_ERROR if failure.
+    - Interface errors: NA
+  */
+  method getComponentVersion(in uint32 componentId, out buffer versionBuffer);
+
+  /**
+    Returns the 32-bit integer OEM ID from fuses.
+
+    @param[out] oemId OEM ID.
+
+    @return
+    - Generic errors: List of generic errors can be checked from TA development guide.
+      - Object_OK if successful.
+    - Interface errors: NA
+  */
+  method getOEMID(out uint32 oemId);
+
+  /**
+    Returns the 32-bit hardware version from the metal layer.
+
+    @param[out] hwVersion Hardware version integer.
+
+    @return
+    - Generic errors: List of generic errors can be checked from TA development guide.
+      - Object_OK if successful.
+    - Interface errors: NA
+  */
+  method getHWVersion(out uint32 hwVersion);
+
+  /**
+    Returns the 32-byte hash of the public key used to verify the boot image.
+
+    @param[out] pkHash Public key hash.
+
+    @return
+    - Generic errors: List of generic errors can be checked from TA development guide.
+      - Object_OK if successful.
+      - Object_ERROR_SIZE_OUT in case pkHash_len is exceeding SECBOOT_OTP_ROOT_OF_TRUST_BYTE_SIZE.
+      - Object_ERROR if any other failure.
+    - Interface errors: NA
+  */
+  method getPKHash(out buffer pkHash);
+
+  /**
+    Returns device information from CM hardware.
+
+    @param[out] deviceId Device Unique ID from CM hardware.
+
+    @return
+    - Generic errors: List of generic errors can be checked from TA development guide.
+      - Object_OK if successful.
+      - Object_ERROR_SIZE_OUT in case deviceId_len is exceeding sizeof(CRI_CM_DEVICE_INFO.deviceId).
+      - Object_ERROR if any other failure.
+    - Interface errors: NA
+   */
+  method getDeviceIdFromCM(out buffer deviceId);
+
+  /**
+    Returns a digest of a salted SHA256 hash of the CHIP_ID concatenated with
+    the SERIAL_NUM.
+
+    This function provides the Client with the ability to create a Client
+    specific unique device ID.
+
+    @param[in]  clientSalt  Buffer from the Client containing the hash salt.
+                            Any value is valid for the clientSalt, even empty.
+    @param[out] deviceId    Client specific digest. The buffer needs to be at
+                            least 32 bytes in size in order to contain the
+                            digest.
+
+    @return
+    - Generic errors: List of generic errors can be checked from TA development guide.
+      - Object_OK if successful.
+      - Object_ERROR_SIZE_OUT in case deviceId_len is exceeding TZBSP_SHA256_HASH_SZ.
+      - Object_ERROR if any other failure.
+    - Interface errors: NA
+  */
+  method getClientDeviceID(in buffer clientSalt, out buffer deviceId);
+
+ /**
+    Returns the 32-bit integer Product ID from fuses.
+
+    @param[out] productId Product ID.
+
+    @return
+    - Generic errors: List of generic errors can be checked from TA development guide.
+      - Object_OK if successful.
+    - Interface errors: NA
+   */
+   method getProductID(out uint32 productId);
+
+  /** @} */ /* end_addtogroup IDeviceID */
+};

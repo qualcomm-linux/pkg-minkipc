@@ -1,0 +1,33 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/** @file  IVMDeviceUniqueKey.idl */
+
+/** @cond */
+interface IVMDeviceUniqueKey {
+/** @endcond */
+
+    /**
+     * @addtogroup IVMDeviceUniqueKey
+     * @{
+     */
+
+    /**
+    Derive and return a VM device unique key.
+
+    @param[out] outKey holds the generated key.
+
+    @detdesc
+    The generated key will have the length of the output buffer. \n
+    This key length is bounded such that 0 < outKeyLen &le; (2<SUP>32</SUP>-1)&frasl;8. \n
+    An error will be returned if these bounds are violated.
+
+    @return
+    Object_OK on success. \n
+    Object_ERROR on failure.
+    */
+
+    method derive (out buffer outKey);
+
+    /** @} */ /* end_addtogroup IVMDeviceUniqueKey */
+};

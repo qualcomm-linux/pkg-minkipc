@@ -1,0 +1,12 @@
+{
+    "idl_dir" : [
+        "./idl"
+    ],
+    "sources": [
+        "src/testapp.c",
+        "Metadata.json"
+    ],
+    "includes": [
+        "../../inc/"
+    ]
+}

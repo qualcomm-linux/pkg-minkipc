@@ -1,0 +1,11 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+ /*===================================================================================
+ FILE:  CEmbeddedIPPTestApp.idl
+
+ DESCRIPTION:  This file specifies the UID that is used to expose
+ IPP test client in QTVM.
+
+ =====================================================================================*/
+
+const uint32 CEmbeddedIPPTestApp_UID = 0xFF000037;

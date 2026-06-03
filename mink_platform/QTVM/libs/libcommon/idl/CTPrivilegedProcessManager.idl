@@ -1,0 +1,18 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/**
+* @addtogroup CTPrivilegedProcessManager
+* @{
+  Class CTPrivilegedProcessManager implements \link ITPPM \endlink interface.
+
+  The class ID `TPrivilegedProcessManager` is not included in the default privilege set. It is part
+  of root container and provides service only to TPreLauncher.
+*/
+
+// This class provides an interface to load Trusted Processes in root container.
+//
+
+const uint32 CTPrivilegedProcessManager_UID = 328;
+
+/** @} */

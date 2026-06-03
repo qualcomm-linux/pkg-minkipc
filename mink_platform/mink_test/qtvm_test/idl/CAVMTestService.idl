@@ -1,0 +1,17 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/**
+* @addtogroup CAVMTestService
+* @{
+  Class CAVMTestService implements \link IAVMTestService \endlink interface.
+
+  The class IDs `CAVMCommonTestService`, `CAVMStressTestService`  is not included in the default
+privilege set. It needs to be added to the privileges section in the metadata to allow the TA to use
+the CAVMTestService class.
+*/
+
+const uint32 CAVMCommonTestService_UID = 0x00ff003a;
+const uint32 CAVMStressTestService_UID = 0x00ff003b;
+
+/** @} */

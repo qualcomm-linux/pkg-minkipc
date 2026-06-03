@@ -1,0 +1,33 @@
+#+SETUPFILE: "doc/basho-doc-style.iorg"
+
+* Formatting codes into specific style
+
+Tested Platforms:
+- Ubuntu 18.04 x86-64
+
+*** Install clang-format
+Install clang-format-3.9:
+#+BEGIN_EXAMPLE
+   $ sudo apt-get update
+   $ sudo apt-get install clang-format-3.9
+#+END_EXAMPLE
+
+*** Basic usage of clang-format
+Please reference:
+#+BEGIN_EXAMPLE
+   $ man clang-format-3.9
+#+END_EXAMPLE
+
+*** Batching formating files automatically
+do_clang_format.py is used to batching formating files including *.h, *.hpp, *.c and *.cpp automatically. Following are some examples:
+
+Formatting all the files(*.h, *.hpp, *.c and *.cpp) which located at specific directory(any file at any level of subdirectory is included):
+#+BEGIN_EXAMPLE
+    $ python $MYHOME/buffer/do_clang_format.py -t gtest/ -s $MYHOME/buffer/ABC.clang-format
+    $ python $MYHOME/buffer/do_clang_format.py -t test/apps/ -s $MYHOME/buffer/ABC.clang-format
+#+END_EXAMPLE
+
+Formatting single file:
+#+BEGIN_EXAMPLE
+    $ python $MYHOME/buffer/do_clang_format.py -f daemons/mink/src/EmbeddedProcessLoader.c -s $MYHOME/buffer/ABC.clang-format
+#+END_EXAMPLE

@@ -1,0 +1,6 @@
+{
+    "appName": "sampleapp_cpp",
+    "neverUnload": "false",
+    "privileges": ["AppClient", "AppLoader", "Diagnostics", "TPowerService"],
+    "services": ["SampleService"]
+}
