@@ -1,8 +1,12 @@
-qcom-minkipc (1.1.1-5~) UNRELEASED; urgency=medium
+qcom-minkipc (1.2.6-1) UNRELEASED; urgency=medium
 
+  [ Abhinaba Rakshit ]
   * WIP — update changelog before next release
 
- -- Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>  Mon, 25 May 2026 10:04:33 +0000
+  [ GitHub Service Bot ]
+  * New upstream release
+
+ -- GitHub Service Bot <githubservice@qti.qualcomm.com>  Wed, 03 Jun 2026 07:12:15 +0000
 
 qcom-minkipc (1.1.1-4) resolute; urgency=medium
 
