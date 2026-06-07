@@ -13,7 +13,8 @@ the owning user and group independently. The values are substituted into
 the qteesupplicant unit files, as well as the qcomtee udev rules.
 
 Also adds udev rules for UFS and eMMC RPMB devices to configure
-them with the same user and group.
+them with the same group. Ownership is still with root as the devices
+are created by kernel.
 
 The sfsconfig service is not provided with a separate user and group and
 remains as root, since it is a one-shot service responsible only for
@@ -45,10 +46,10 @@ Index: pkg-minkipc/qtee_supplicant/qcomtee-udev.rules.in
  # SPDX-License-Identifier: BSD-3-Clause-Clear
  
 -KERNEL=="tee[0-9]*", MODE="0660", OWNER="root", TAG+="systemd" ENV{SYSTEMD_WANTS}+="qteesupplicant.service"
-+KERNEL=="tee[0-9]*", MODE="0660", OWNER="@DISTRO_USER@", GROUP="@DISTRO_GROUP@", TAG+="systemd" ENV{SYSTEMD_WANTS}+="qteesupplicant.service"
-+KERNEL=="0:0:0:49476", SUBSYSTEM=="bsg", MODE="0660", OWNER="@DISTRO_USER@", GROUP="@DISTRO_GROUP@", TAG+="systemd" ENV{SYSTEMD_WANTS}+="qteesupplicant.service"
-+KERNEL=="ufs-bsg0", SUBSYSTEM=="bsg", MODE="0660", OWNER="@DISTRO_USER@", GROUP="@DISTRO_GROUP@", TAG+="systemd" ENV{SYSTEMD_WANTS}+="qteesupplicant.service"
-+KERNEL=="mmcblk0rpmb", SUBSYSTEM=="mmc_rpmb", MODE="0660", OWNER="@DISTRO_USER@", GROUP="@DISTRO_GROUP@", TAG+="systemd" ENV{SYSTEMD_WANTS}+="qteesupplicant.service"
++KERNEL=="tee[0-9]*", MODE="0660", OWNER="root", GROUP="@DISTRO_GROUP@", TAG+="systemd" ENV{SYSTEMD_WANTS}+="qteesupplicant.service"
++KERNEL=="0:0:0:49476", SUBSYSTEM=="bsg", MODE="0660", OWNER="root", GROUP="@DISTRO_GROUP@", TAG+="systemd" ENV{SYSTEMD_WANTS}+="qteesupplicant.service"
++KERNEL=="ufs-bsg0", SUBSYSTEM=="bsg", MODE="0660", OWNER="root", GROUP="@DISTRO_GROUP@", TAG+="systemd" ENV{SYSTEMD_WANTS}+="qteesupplicant.service"
++KERNEL=="mmcblk0rpmb", SUBSYSTEM=="mmc_rpmb", MODE="0660", OWNER="root", GROUP="@DISTRO_GROUP@", TAG+="systemd" ENV{SYSTEMD_WANTS}+="qteesupplicant.service"
 Index: pkg-minkipc/qtee_supplicant/qteesupplicant.service.in
 ===================================================================
 --- pkg-minkipc.orig/qtee_supplicant/qteesupplicant.service.in
