@@ -1,0 +1,29 @@
+/** @file ITProcessController.idl */
+
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/**
+  ITProcessController manages TProcess structures in root container.
+*/
+/** @cond */
+interface ITProcessController {
+/** @endcond */
+
+  /**
+   * @addtogroup ITProcessController
+   * @{
+   */
+
+  /** @cond */
+  /** @endcond */
+
+  /**
+    Unloads a trusted process forcibly.
+
+    @return  Object_OK if successful.
+  */
+  method forceClose();
+
+  /** @} */ /* end_addtogroup ITProcessController */
+};

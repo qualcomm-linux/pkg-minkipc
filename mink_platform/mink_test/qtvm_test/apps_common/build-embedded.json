@@ -1,0 +1,14 @@
+{
+    "idl_dir" : [
+        "./idl"
+    ],
+    "sources": [
+        "src/testapp.c",
+        "Metadata.json"
+    ],
+    "includes": [
+        "../../inc/"
+    ],
+    "customizedCFlags": ["-DEMBEDDED_PROC"],
+    "sectionMetadata" : "true"
+}

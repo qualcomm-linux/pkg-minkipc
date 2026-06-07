@@ -1,0 +1,18 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/** @file IConfirmationToken.idl  */
+
+/**
+ * @addtogroup IConfirmationToken
+ * @{
+ */
+interface IConfirmationToken {
+
+  /**
+   * Sign the passed token with HMAC key
+   * and return the mac.
+   */
+  method signConfirmationToken(in buffer token, out buffer mac);
+   /** @} */ /* end_addtogroup IConfirmationToken */
+};

@@ -1,0 +1,8 @@
+{
+    "appName": "EmbeddedSpareTestService",
+    "neverUnload": "true",
+    "privileges": [
+        "EmbeddedCommonTestService"
+    ],
+    "services": ["EmbeddedSpareTestService"]
+}

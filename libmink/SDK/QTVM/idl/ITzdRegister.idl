@@ -1,0 +1,44 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/**
+ * Interface used to obtain the credentials associated to REE clients registered
+ * via SMC Invoke.
+ */
+ /** @cond */
+interface ITzdRegister {
+/** @endcond */
+
+/**
+   * @addtogroup ITzdRegister
+   * @{
+   */
+
+    /**
+        Obtain a Client Env from mink daemon.
+
+        @param[in]  clientId     A null terminated ID to use for this client.
+        @param[in]  credentials  A credential buffer CBOR encoded.
+        @param[in]  whitelist    A Whitelist of class ids for the client.
+        @param[out] obj          Client environment.
+
+        @return
+        Object_OK on success.
+    */
+
+    method getClientEnv (in int8[] clientId, in buffer credentials, in uint32[] whitelist, out interface env);
+
+    /**
+        Obtain a Client Env from mink daemon for trusted clients.
+
+        @param[in]  clientId     A null terminated ID to use for this client.
+        @param[in]  credentials  A credential buffer CBOR encoded.
+        @param[out] obj          Client environment.
+
+        @return
+        Object_OK on success.
+    */
+    method getTrustedClientEnv (in int8[] clientId, in buffer credentials, out interface env);
+
+  /* @} */ /* end_addtogroup IClientEnv */
+};

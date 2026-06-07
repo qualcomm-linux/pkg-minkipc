@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "mink_teec.h"
 
@@ -76,6 +77,7 @@ static int32_t CWait_release(CWait *me)
 		QList_free(&me->list);
 		pthread_mutex_destroy(&me->lock);
 		free(me);
+		me = NULL;
 	}
 
 	return Object_OK;
@@ -162,6 +164,7 @@ static bool get_signal_item(QList *list, uint32_t code, uint32_t events,
 	if (found) {
 		QNode_dequeue(node);
 		free(l_item);
+		l_item = NULL;
 	}
 
 	return found;
@@ -182,6 +185,8 @@ static list_item *queue_signal_item(QList *list, uint32_t code, uint32_t events)
 	if (!l_item)
 		return NULL;
 
+	memset(l_item, 0, sizeof(list_item));
+	QNode_construct(&l_item->qn);
 	l_item->type = TYPE_SIGNAL_ITEM;
 	l_item->item.s_item.events = events;
 	l_item->item.s_item.code = code;
@@ -206,6 +211,8 @@ static list_item *queue_waiter_item(QList *list, uint32_t code, uint32_t events)
 	if (!l_item)
 		return NULL;
 
+	memset(l_item, 0, sizeof(list_item));
+	QNode_construct(&l_item->qn);
 	l_item->type = TYPE_WAITER_ITEM;
 
 	waiter_item *w_item = &(l_item->item.w_item);
@@ -234,6 +241,7 @@ static void clear_waiter_item(list_item *l_item)
 	pthread_cond_destroy(&w_item->condition);
 
 	free(l_item);
+	l_item = NULL;
 }
 
 /**
@@ -397,6 +405,8 @@ int32_t CWait_open(Object *objOut)
 	CWait *me = (CWait *)malloc(sizeof(CWait));
 	if (!me)
 		return Object_ERROR;
+
+	memset(me, 0, sizeof(CWait));
 
 	atomic_init(&me->refs, 1);
 	QList_construct(&me->list);

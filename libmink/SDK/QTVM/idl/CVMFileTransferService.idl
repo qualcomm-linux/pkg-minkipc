@@ -1,0 +1,20 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/**
+* @addtogroup CVMFileTransferService
+* @{
+  Class CVMFileTransferService implements \link IVMFileTransferService \endlink interface.
+
+  The class ID `CVMFileTransferService` is an embedded service in QTVM.
+*/
+
+/*===================================================================================
+FILE:  CVMFileTransferService.idl
+
+DESCRIPTION:  This file specifies the UID that is used to expose
+VMFileTransferService service in QTVM.
+
+=====================================================================================*/
+
+const uint32 CVMFileTransferService_UID = 252;

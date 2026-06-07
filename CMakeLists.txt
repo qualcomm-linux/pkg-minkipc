@@ -21,21 +21,23 @@ option(CFG_USE_PKGCONFIG "Use pkg-config for discovering install target director
 # Build RPMB listener
 option(BUILD_RPMB_LISTENER "Build RPMB Listener" TRUE)
 
+# Build PKCS-11
+option(BUILD_PKCS11 "Build PKCS#11" TRUE)
+
 include(GNUInstallDirs)
 
 set(MINKIDLC_BIN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/idlc" CACHE PATH "Directory containing the idlc executable")
 set(SYSTEMD_UNIT_DIR "" CACHE PATH "Directory containing the systemd unit path")
 set(UDEV_DIR "" CACHE PATH "Directory containing the UDEV path")
-set(MINKIPC_LIBEXEC_DIR "" CACHE PATH "Directory containing the libexec script/binaries path")
+set(PERSIST_MOUNT_UNIT "" CACHE PATH "Name of the systemd unit responsible for mounting the persist partition")
 
 if ("${MINKIDLC_BIN_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}/idlc")
 	file(DOWNLOAD
 	https://github.com/quic/mink-idl-compiler/releases/download/v0.2.0/idlc
 	${MINKIDLC_BIN_DIR}/idlc
 	)
+	file(CHMOD ${MINKIDLC_BIN_DIR}/idlc PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ)
 endif()
-
-file(CHMOD ${MINKIDLC_BIN_DIR}/idlc PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ)
 
 add_compile_options(
 	-Wall -Wextra -Werror -Wshadow -Wcast-align
@@ -67,3 +69,11 @@ endif()
 if(BUILD_RPMB_LISTENER)
 	add_subdirectory(listeners/librpmbservice)
 endif()
+
+if (BUILD_PKCS11)
+	add_subdirectory(optee-client)
+	if (BUILD_UNITTEST)
+		add_subdirectory(optee-test)
+	endif()
+endif()
+

@@ -1,0 +1,171 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/** @file ISecureDSPService.idl */
+
+/**
+ * @brief
+ * ISecureDSPService.idl provides a Mink IDL interface to load and communicate with modules, with a straightforward interface (open/close/run/etc)
+ */
+include "IMemObject.idl"
+
+const uint32 MAX_INPUT_BUFFERS = 4;
+const uint32 MAX_OUTPUT_BUFFERS = 4;
+
+/**
+ * Default domain id to open session on CDSP subsystem
+ */
+const int32 DEFAULT_DOMAIN_ID = -1;
+
+/**
+ * Secure DSP Module interface. Each SecureDspModule represents one module
+ * loaded into a session.
+ */
+interface SecureDspModule {
+    /**
+     * Run an operation defined in the module. The Secure DSP framework
+     * forwards the call to the module_run() function defined in the
+     * library. The client and the module must define a suitable set of
+     * operations.
+     *
+     * Input and output buffers must be Mink memory objects, allocated as
+     * dma-bufs, and implement the FdWrapper interface. The buffers are
+     * mapped to the Secure DSP module for the duration of the call.
+     *
+     * @param [in] operation An operation identifier
+     * @param [in] inbufX Four input buffers
+     * @param [out] outBufX Four output buffers
+     */
+    method run(in uint32 operation,
+               in interface inbuf0, in uint32 inbuf0Size, in interface inbuf1, in uint32 inbuf1Size, in interface inbuf2, in uint32 inbuf2Size, in interface inbuf3, in uint32 inbuf3Size,
+               in interface outbuf0, in uint32 outbuf0Size, in interface outbuf1, in uint32 outbuf1Size, in interface outbuf2, in uint32 outbuf2Size, in interface outbuf3, in uint32 outbuf3Size);
+};
+
+/**
+ * Session object; one session per client.
+ * The initial Kailua implementation only supports one session total and
+ * one module per session.
+*/
+interface SecureDspSession {
+
+    /**
+     * User error codes start at 10
+     */
+    error ERROR_NOT_ALLOWED;                     /**< Operation not allowed */
+
+    /**
+     * Open a secure fastrpc session to one of the subsystem
+     *
+     * @param [in] domain Selecting on of the DSP domain to open session from.
+     */
+    method openSession(in int32 domain);
+
+    /**
+     * Allocate memory to be used within this Secure DSP session.
+     * This API will be deprecated in the future.
+     * Clients are encouraged to use secure_remote_mmap with
+     * flags SECURE_MAP_ADD_HEAP and SECURE_MAP_ADD_POOL to add to the heap
+     * and pool of Secure User PD.
+     *
+     * @param [in] heapSize Heap memory size in bytes
+     * @param [in] codeSize Code memory size in bytes. Used to load modules.
+     */
+    method allocMemory(in uint32 heapSize, in uint32 codeSize);
+
+    /**
+     * Load a DSP module into the session. The client must authenticate the
+     * module as appropriate.
+     *
+     * @param [in] soFile The module as an ELF shared object, stored in a
+     *                    Mink memory object. The underlying memory must
+     *                    be allocated as a dma-buf, and the object must
+     *                    implement FdWrapper interface. The client can free
+     *                    the memory object after the call returns.
+     * @param [in] soFileSize Dynamic library size.
+     * @param [in] moduleName Module name as an UTF-8 string. The module name
+     *                        is used as a prefix for locating module symbols
+     *                        in the shared object, e.g. moduleName_open()
+     * @param [out] dspModule A SecureDspModule object for the module.
+     */
+    method openModule(in interface soFile, in uint32 soFileSize, in uint8[] moduleName,
+                      out SecureDspModule dspModule);
+
+    /**
+     * Unload a DSP module from the session. The client must ensure the
+     * module is no longer executing any code in the background before
+     * unloading it.
+     *
+     * @param [in] dspModule A SecureDspModule object
+     */
+    method closeModule(in SecureDspModule dspModule);
+
+    /**
+     * Enable runtime FARF logs on DSP_service and/or Secure User PD.
+     * Buffer mask will be written to file DSP_service.farf. farfMask is expected to be
+     * a NULL terminated string with a max length of 511 bytes. Anything above this
+     * length will be discarded.
+     * Fastrpc library will proceed to read DSP_service.farf and enable corresponding runtime FARF logs.
+     * If DSP logs enabled, Secure User PD logs will be send to QTVM's stdout buffer.
+     *
+     * @param [in] farfMask Runtime FARF mask file sent as a Memory Object
+     */
+    method enableRuntimeFARF(in IMemObject farfMask);
+
+    /**
+     * Secure remote map flags:
+     * Persistent buffer mapping flags.
+     * - SECURE_MAP_FD                  : Buffer will be mapped on SMMU and DSP.
+     *                                    Once buffer is mapped, clients can retrieve/release buffer's VA
+     *                                    from DSP secure module using HAP API HAP_mmap_get()/HAP_mmap_put().
+     * - SECURE_MAP_FD_DELAYED          : Buffer will be mapped on SMMU only.
+     *                                    Once buffer is mapped, clients will have to map/unmap buffers from
+     *                                    DSP secure module using HAP API HAP_mmap()/HAP_munmap().
+     * - SECURE_MAP_ADD_HEAP            : Buffer will be added to user Secure User PD's heap.
+     *                                    Once added to the heap, buffer cannot be
+     *                                    unmapped until session is terminated.
+     *                                    No value is returned in buffer_id.
+     * - SECURE_MAP_ADD_POOL            : Buffer will be added to user Secure User PD's pool.
+     *                                    Once added to the pool, buffer cannot be
+     *                                    unmapped until session is terminated.
+     *                                    No value is returned in buffer_id.
+     * - SECURE_MAP_FD_EXTENDED         : Similar to SECURE_MAP_FD, but mapping will be done in the FAR
+     *                                    region of the DSP.
+     * - SECURE_MAP_FD_DELAYED_EXTENDED : Similar to SECURE_MAP_FD_DELAYED, but mapping needs to be
+     *                                    done in the FAR region of the DSP.
+     */
+    const uint32 SECURE_MAP_FD                     = 0;
+    const uint32 SECURE_MAP_FD_DELAYED             = 1;
+    const uint32 SECURE_MAP_ADD_HEAP               = 2;
+    const uint32 SECURE_MAP_ADD_POOL               = 3;
+    const uint32 SECURE_MAP_FD_EXTENDED            = 4;
+    const uint32 SECURE_MAP_FD_DELAYED_EXTENDED    = 5;
+
+    /**
+     * Create a buffer mapping on secure remote process.
+     * Buffer will be mapped persistently on SMMU. DSP mapping will depend on the flags used.
+     * Clients are required to maintain cache coherence of their buffers once they are mapped.
+     * Cache invalidation/flushing are up to the client's discretion and requirements.
+     * These cache operations should be perform on the DSP from the client's secure module.
+     *
+     * @param [in] buffer     : Buffer to map on Secure User PD
+     * @param [in] offset     : Offset from the beginning of the buffer
+     * @param [in] length     : Size of buffer in bytes
+     * @param [in] flags      : Controls mapping functionality on DSP. Use one of the flags provided
+     * @param [out] buffer_id : Represents registered buffer on remote process.
+     *                          Buffer_id must be at least sizeof(int).
+     */
+    method secure_remote_mmap(in IMemObject buffer, in uint64 offset, in uint64 length,
+                              in uint32 flags, out buffer buffer_id);
+
+    /**
+     * Unmap buffer from secure remote process.
+     * Buffers are unmapped from DSP and SMMU.
+     * HEAP and POOL buffers cannot be unmapped.
+     * Error ERROR_NOT_ALLOWED returned when trying to unmap these buffers.
+     *
+     * @param [in] buffer_id : Represents registered buffer on remote process
+     * @param [in] length    : Size of buffer in bytes (optional)
+     * @param [in] flags     : Unsupported. Use 0.
+     */
+    method secure_remote_unmmap(in int32 buffer_id, in uint64 length, in uint32 flags);
+};

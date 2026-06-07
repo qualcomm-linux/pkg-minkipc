@@ -1,0 +1,29 @@
+/** @file ITMemLock.idl */
+
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/**
+  ITMemLock is an interface for locking memory objects.
+*/
+/** @cond */
+interface ITMemLock {
+/** @endcond */
+
+  /**
+   * @addtogroup ITMemLock
+   * @{
+   */
+
+  /*
+   * Error codes
+   */
+  /** @cond */
+  error ERROR_BAD_MEMOBJ;              /**< Non-msmmemObj */
+  error ERROR_OPEN_DRIVER;             /**< Failed to open driver */
+  error ERROR_LOCK_BUFFER;             /**< Failed to lock the buffer */
+  error ERROR_UNLOCK_BUFFER;           /**< Failed to unlock the buffer */
+  /** @endcond */
+
+  /** @} */ /* end_addtogroup ITMemLock */
+};

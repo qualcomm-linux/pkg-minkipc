@@ -1,0 +1,42 @@
+#+SETUPFILE: "doc/basho-doc-style.iorg"
+
+* Mink Test
+
+** Usage of gtest library
+[[https://google.github.io/googletest/][Official Documentation of GTest]]
+
+** Usage of mink_test
+We could use a filter to run specific test cases. (Note that following examples aim to be run by 'make testLE' at root directory.)
+For example, if we want to run a single specific test case:
+#+BEGIN_EXAMPLE
+    ./test/mink_test --gtest_filter=TvmdTest.PositiveLoadEmbeddedModule
+#+END_EXAMPLE
+If we want to run all positive test cases:
+#+BEGIN_EXAMPLE
+    ./test/mink_test --gtest_filter=TvmdTest.*Positive*
+#+END_EXAMPLE
+If we want to run all non-stress-test cases:
+#+BEGIN_EXAMPLE
+    ./test/mink_test --gtest_filter=TvmdTest.*-TvmdTest.*Stress*
+#+END_EXAMPLE
+If we want to run all stress-test cases:
+#+BEGIN_EXAMPLE
+    ./test/mink_test --gtest_filter=TvmdTest.*Stress*
+#+END_EXAMPLE
+If we want to run all non-stress-test and negative cases:
+#+BEGIN_EXAMPLE
+    ./test/mink_test --gtest_filter=TvmdTest.*Negative*-TvmdTest.*Stress*
+#+END_EXAMPLE
+If we want to run all stress-test and positive cases:
+#+BEGIN_EXAMPLE
+    ./test/mink_test --gtest_filter=TvmdTest.*PositiveStress*
+#+END_EXAMPLE
+
+** Supported modules to test
+Following are supported modules to test:
+#+BEGIN_EXAMPLE
+    ./test/mink_test --gtest_filter=TvmdTest.*
+    ./test/mink_test --gtest_filter=TModuleTest.*
+    ./test/mink_test --gtest_filter=CTRegisterModuleTest.*
+    ./test/mink_test --gtest_filter=*MetadataInfoTests*
+#+END_EXAMPLE

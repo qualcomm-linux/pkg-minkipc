@@ -1,0 +1,39 @@
+/** @file ITRegisterModule.idl */
+
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+include "IModule.idl"
+
+/**
+  ITRegisterModule provides interface to register container modules.
+*/
+
+/** @cond */
+interface ITRegisterModule {
+/** @endcond */
+
+  /**
+   * @addtogroup ITRegisterModule
+   * @{
+   */
+
+  /*
+   * Error codes
+   */
+  /** @cond */
+  error ERROR_TIMEDOUT;                     /**< Too much time elapsed during IModule exchange */
+  /** @endcond */
+
+  /**
+    Register processes module according to its PID.
+
+    @param[in]  containerModule  \link IModule \endlink to access the container.
+
+    @return  Object_OK if successful.
+   */
+  method registerIModule(in IModule containerModule);
+
+  /** @} */ /* end_addtogroup ITRegisterModule */
+
+};

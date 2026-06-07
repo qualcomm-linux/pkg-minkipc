@@ -1,0 +1,7 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+// This UID is used by 'SecureCamera2App' TA in QTVM.
+
+// The hex value of this UID is 0x165
+const uint32 CTrustedCameraMemory_UID = 357;

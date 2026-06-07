@@ -1,0 +1,98 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/*===================================================================================
+FILE:  IIDVService.idl
+
+DESCRIPTION: IIDVService.idl defines the interface for image attestation
+=====================================================================================*/
+
+include "IMemObject.idl"
+
+struct IDVService_ImageConfig {
+    uint32 input_buffer_size;       /**< Size of the input buffer in bytes */
+    uint32 output_buffer_size;      /**< Size of the output buffer in bytes */
+    uint32 image_format;            /**< Format of the image (see FORMAT_IMAGE_ constants) */
+    uint32 image_subsampling;       /**< Integer constant indicating YUV subsampling (IMAGE_SAMP_ constants) */
+    uint32 height;                  /**< Height of the image in pixels */
+    uint32 width;                   /**< Width of the image in pixels */
+    uint32 stride;                  /**< Difference in bytes between 2 scanlines */
+    uint32 scanline;                /**< Number of pixels per row in an image*/
+    uint32 quality_level;           /**< Image quality level between 0 to 100 */
+    uint32 reserved1;               /**< Reserved for future use */
+    uint32 reserved2;               /**< Reserved for future use */
+    uint8[8] reserved;              /**< Reserved for future use */
+};
+
+
+/** @cond */
+interface IDVService
+/** @endcond */
+{
+    /**
+    * @addtogroup IDVService
+    * @{
+    */
+
+    error ERROR_INVALID_MEMOBJ; /**< MemObject could not be unwrapped. */
+    error ERROR_MAPPING_MEMOBJ; /**< MemObject could not be mapped. */
+    error ERROR_NULL_MEMOBJ;    /**< MemObject shouldn't be NULL */
+    error ERROR_DEVICE_INFO_RETRIEVAL; /**< Failure to retrieve device information */
+    error ERROR_COLOR_CONVERSION; /**< Failure to change image from NV21 to YUV */
+    error ERROR_IMAGE_FORMAT_CONVERSION; /**< Failure to change image format from YUV to JPEG */
+    error ERROR_EXLUSIVE_ACCESS_CHECK; /**< When buffers are not smmu proxy controlled */
+    error ERROR_ACQUIRE_LOCK; /**< Failed to acquire locks when buffers are not mapped */
+    error ERROR_INSUFFICIENT_LENGTH; /**< Short buffer error */
+    error ERROR_BUILD_ATTESTATION_REPORT; /**< Failed to build attestation report */
+    error ERROR_DEVICE_INFO_PARSING; /**< Failed to parse device information */
+    error ERROR_OPEN_MINK_SERVICE; /**< Failure to open a service or a TA */
+    error ERROR_IMAGE_CONFIG_PARAMS; /**< Invalid image parameters */
+    error ERROR_INVALID_DEVICE_STATE; /**< Invalid device state */
+    error ERROR_OUT_OF_MEMORY; /**< Error allocating memory */
+
+    /* Supported input formats */
+    const uint32 FORMAT_IMAGE_NV21 = 0;
+    const uint32 FORMAT_IMAGE_NV12 = 1;
+    const uint32 FORMAT_IMAGE_YUV  = 2;
+    const uint32 FORMAT_IMAGE_JPEG = 3;
+
+    /* Level of chrominance subsampling */
+    const uint32 IMAGE_SAMP_444 = 0;
+    const uint32 IMAGE_SAMP_422 = 1;
+    const uint32 IMAGE_SAMP_420 = 2;
+    const uint32 IMAGE_SAMP_GRAY = 3;
+    const uint32 IMAGE_SAMP_440 = 4;
+    const uint32 IMAGE_SAMP_411 = 5;
+
+    /**
+     * Generate attestation report for the main image and thumbnail image.
+     * It always provides compressed JPEG images as output for both main and thumbnail images
+     *
+     * @param  [in]  input_main_image             - Secure input main image
+     * @param  [in]  output_main_image            - Output main image
+     * @param  [in]  input_thumbnail_image        - Secure input thumbnail image
+     * @param  [in]  output_thumbnail_image       - Output thumbnail image
+     * @param  [in]  assertions                   - Assertions
+     * @param  [in]  main_image_config            - Main image configuration
+     * @param  [in]  thumbnail_image_config       - Thumbnail image configuration
+     * @param  [out] final_attestation_report     - Final attestation report
+     * @param  [out] out_main_image_size          - Final main image size
+     * @param  [out] out_thumbnail_image_size     - Final thumbnail image size
+     *
+     * @return
+     * Object_OK on success. Any other error code on failure.
+     */
+     method getAttestationReportForImage(
+         in IMemObject input_main_image,
+         in IMemObject output_main_image,
+         in IMemObject input_thumbnail_image,
+         in IMemObject output_thumbnail_image,
+         in buffer assertions,
+         in IDVService_ImageConfig main_image_config,
+         in IDVService_ImageConfig thumbnail_image_config,
+         out buffer final_attestation_report,
+         out uint32 out_main_image_size,
+         out uint32 out_thumbnail_image_size);
+
+    /** @} */ /* end_addtogroup IDVService */
+};

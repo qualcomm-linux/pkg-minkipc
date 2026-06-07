@@ -1,0 +1,523 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+include "IMemRegion.idl"
+
+struct ISecureImage_programHeader {
+  uint64 p_type;
+  uint64 p_offset;
+  uint64 p_vaddr;
+  uint64 p_paddr;
+  uint64 p_filesz;
+  uint64 p_memsz;
+  uint64 p_flags;
+  uint64 p_align;
+};
+
+struct ISecureImage_elfHeader {
+  uint64 e_ident_class;
+  uint64 e_type;
+  uint64 e_machine;
+  uint64 e_entry;
+  uint64 e_phoff;
+  uint64 e_flags;
+  uint64 e_ehsize;
+  uint64 e_phentsize;
+  uint64 e_phnum;
+};
+
+struct ISecureImage_verifyInputs {
+  uint64 enforcement_policy;
+  uint32 encryption_scheme;
+  uint32 feature_id;
+  uint32 sw_id;
+  uint32 secondary_sw_id;
+  uint32 oem_min_ar_version;
+  uint32 qti_min_ar_version;
+};
+
+/**
+ * Inner interface for retrieving information from a parsed ELF image. The methods defined here can also be used with the IVerifiedSecureImageELFInfo interface.
+ */
+ /** @cond */
+interface ISecureImageELFInfoSnapshot{
+/** @endcond */
+
+  /**
+  * @addtogroup ISecureImageELFInfoSnapshot
+  * @{
+  */
+
+  /**
+    * Returns an ISecureImage_programHeader with all the information from the Program Header at phdrIndex.
+    *
+    * @param[in]  phdrIndex        Index of the requested Program Header.
+    * @param[out] programHeader    ISecureImage_programHeader with all Program Header fields.
+    *
+    * @return Object_OK on success. Any other ISecureImage error code on failure.
+    */
+  method getProgramHeader(in uint32 phdrIndex, out ISecureImage_programHeader programHeader);
+
+  /**
+    * Returns an ISecureImage_elfHeader with information from the parsed image's ELF Header.
+    *
+    * @param[out] elfHeader    ISecureImage_elfHeader with relevant ELF Header fields.
+    *
+    * @return Object_OK on success. Any other ISecureImage error code on failure.
+    */
+  method getELFHeader(out ISecureImage_elfHeader elfHeader);
+
+  /** @} */ /* end_addtogroup ISecureImageELFInfoSnapshot */
+};
+
+/**
+ * An extension to ISecureImageELFInfoSnapshot adding getProgramHeaders.
+ */
+ /** @cond */
+interface ISecureImageELFInfo : ISecureImageELFInfoSnapshot{
+/** @endcond */
+
+  /**
+  * @addtogroup ISecureImageELFInfo
+  * @{
+  */
+
+  /**
+    * Returns an ISecureImage_programHeader array of desired type with all the information from all the Program Headers.
+    *
+    * @param[out] programHeaders    ISecureImage_programHeader with all Program Header fields.
+    *
+    * @return Object_OK on success. Any other ISecureImage error code on failure.
+    */
+  method getProgramHeaders(out ISecureImage_programHeader[] programHeaders);
+
+  /** @} */ /* end_addtogroup ISecureImageELFInfo */
+};
+
+/**
+ * Inner interface for retrieving information from a verified ELF image. The methods defined in ISecureImageELFInfoSnapshot can also be used by this interface.
+ */
+ /** @cond */
+interface IVerifiedSecureImageELFInfoSnapshot : ISecureImageELFInfoSnapshot {
+/** @endcond */
+
+  /**
+  * @addtogroup IVerifiedSecureImageELFInfoSnapshot
+  * @{
+  */
+
+  /**
+    * Returns the parameter indicated by param in the output buffer.
+    *
+    * @param[in]  param    One of the PARAM_OUT IDs corresponding to a buffer parameter defined in the ISecureImage interface.
+    * @param[out] value    The requested parameter.
+    *
+    * @return Object_OK on success. Any other ISecureImage error code on failure.
+    */
+  method getBufParameter(in uint32 param, out buffer value);
+
+  /**
+    * Returns the parameter indicated by param.
+    *
+    * @param[in]  param    One of the PARAM_OUT IDs corresponding to an int parameter defined in the ISecureImage interface.
+    * @param[out] value    The requested parameter.
+    *
+    * @return Object_OK on success. Any other ISecureImage error code on failure.
+    */
+  method getIntParameter(in uint32 param, out uint32 value);
+
+  /** @} */ /* end_addtogroup IVerifiedSecureImageELFInfoSnapshot */
+};
+
+/**
+ * An extension to IVerifiedSecureImageELFInfoSnapshot, adding getObjParameter() and getProgramHeaders().
+ */
+ /** @cond */
+interface IVerifiedSecureImageELFInfo : IVerifiedSecureImageELFInfoSnapshot {
+/** @endcond */
+
+  /**
+  * @addtogroup IVerifiedSecureImageELFInfo
+  * @{
+  */
+
+  /**
+    * Returns an ISecureImage_programHeader array of desired type with all the information from all the Program Headers.
+    *
+    * @param[out] programHeaders    ISecureImage_programHeader with all Program Header fields.
+    *
+    * @return Object_OK on success. Any other ISecureImage error code on failure.
+    */
+  method getProgramHeaders(out ISecureImage_programHeader[] programHeaders);
+
+  /**
+    * Returns the parameter indicated by param in the output object.
+    *
+    * @param[in]  param    One of the PARAM_OUT IDs corresponding to an object parameter defined in the ISecureImage interface.
+    * @param[out] value    The requested parameter.
+    *
+    * @return Object_OK on success. Any other ISecureImage error code on failure.
+    */
+  method getObjParameter(in uint32 param, out interface value);
+
+  /** @} */ /* end_addtogroup IVerifiedSecureImageELFInfo */
+};
+
+/**
+ * Outer interface for MDT use cases.
+ */
+ /** @cond */
+interface IVerifiedSecureImageMDTInfoSnapshot : IVerifiedSecureImageELFInfoSnapshot {
+/** @endcond */
+
+  /**
+  * @addtogroup IVerifiedSecureImageMDTInfoSnapshot
+  * @{
+  */
+
+  /**
+    * Verifies the provided segment. Decrypts the segment if encrypted.
+    *
+    * @param[in]  phdrIndex           The segment's Program Header index.
+    * @param[in]  segment             Segment data to be verified and decrypted if encrypted.
+    * @param[out] decryptedSegment    Decrypted segment data, if segment is encrypted. If NULL or equal to segment, decryption is performed in-place.
+    *
+    * @return Object_OK on success. Any other ISecureImage error code on failure.
+    */
+  method verifySegmentFromBuf(in uint32 phdrIndex, in buffer segment, out buffer decryptedSegment);
+
+  /**
+    * Verifies the provided segment. Decrypts the segment if encrypted.
+    *
+    * @param[in]  phdrIndex    The segment's Program Header index.
+    * @param[in]  segment      Segment data to be verified and decrypted if encrypted.
+    *
+    * @return Object_OK on success. Any other ISecureImage error code on failure.
+    */
+  method verifySegmentFromMemObj(in uint32 phdrIndex, in IMemRegion segment);
+
+  /**
+    * Verifies the provided segments. Decrypts the segments if encrypted.
+    *
+    * @param[in]  segments             Segment data to be verified and decrypted if encrypted. Should contain the data for all the image's segments.
+    * @param[out] decryptedSegments    Decrypted segment data, if segments are encrypted. If NULL or equal to segments, decryption is performed in-place.
+    *
+    * @return Object_OK on success. Any other ISecureImage error code on failure.
+    */
+  method verifySegmentsFromBuf(in buffer segments, out buffer decryptedSegments);
+
+  /**
+    * Verifies the provided segments. Decrypts the segments if encrypted.
+    *
+    * @param[in]  segments    Segment data to be verified and decrypted if encrypted. Should contain the data for all the image's segments.
+    *
+    * @return Object_OK on success. Any other ISecureImage error code on failure.
+    */
+  method verifySegmentsFromMemObj(in IMemRegion segments);
+
+  /** @} */ /* end_addtogroup IVerifiedSecureImageMDTInfoSnapshot */
+};
+
+/**
+ * An extension to IVerifiedSecureImageMDTInfoSnapshot, adding getObjParameter() and getProgramHeaders().
+ */
+ /** @cond */
+interface IVerifiedSecureImageMDTInfo : IVerifiedSecureImageMDTInfoSnapshot {
+/** @endcond */
+
+  /**
+  * @addtogroup IVerifiedSecureImageMDTInfo
+  * @{
+  */
+
+  /**
+    * Returns an ISecureImage_programHeader array of desired type with all the information from all the Program Headers.
+    *
+    * @param[out] programHeaders    ISecureImage_programHeader with all Program Header fields.
+    *
+    * @return Object_OK on success. Any other ISecureImage error code on failure.
+    */
+  method getProgramHeaders(out ISecureImage_programHeader[] programHeaders);
+
+  /**
+    * Returns the parameter indicated by param in the output object.
+    *
+    * @param[in]  param    One of the PARAM_OUT IDs corresponding to an object parameter defined in the ISecureImage interface.
+    * @param[out] value    The requested parameter.
+    *
+    * @return Object_OK on success. Any other ISecureImage error code on failure.
+    */
+  method getObjParameter(in uint32 param, out interface value);
+
+  /** @} */ /* end_addtogroup IVerifiedSecureImageMDTInfo */
+};
+
+/**
+ * WARNING!!! Do not add any new methods to this interface.
+ * You may add but not modify error codes and constants.
+ */
+ /** @cond */
+interface ISecureImageSnapshot {
+/** @endcond */
+
+  /**
+  * @addtogroup ISecureImageSnapshot
+  * @{
+  */
+    /* Error Codes */
+    error ERROR_OUT_OF_MEMORY;              /** Failed to allocate heap memory. */
+    error ERROR_INVALID_PARAMETER;          /** Input parameter is invalid. */
+    error ERROR_EXTRACT_DATA;               /** Failed to retrieve or parse data. Possible causes include a buffer overflow, or less data was provided in a buffer than expected. */
+    error ERROR_ELF_HDR_PARSE;              /** Failed to parse the ELF Header from a provided image buffer. */
+    error ERROR_PHDR_PARSE;                 /** Failed to parse a Program Header Table segment from a provided image buffer. */
+    error ERROR_HASH_SEGMENT_MISSING;       /** Failed to find a hash table segment in the provided image. */
+    error ERROR_HASH_SEGMENT_OVERLAP;       /** Another segment overlaps with the hash table segment. */
+    error ERROR_HASH_SEGMENT_CONTEXT;       /** Failed to initialize the secboot context. */
+    error ERROR_MULTIPLE_HASH_SEGMENTS;     /** Multiple hash table segments were detected in the provided image. */
+    error ERROR_HASH_TABLE_SIZE;            /** Parsed hash table length was found to be 0. */
+    error ERROR_PHDR_SEGMENT_MISSING;       /** Failed to find a Program Header Table Segment in the image. */
+    error ERROR_PHDR_SEGMENT_OVERLAP;       /** Another segment overlaps with the Program Header Table segment. */
+    error ERROR_MULTIPLE_PHDR_SEGMENTS;     /** Multiple Program Header Table segments were detected in the provided image. */
+    error ERROR_HASH;                       /** Failed to hash provided segment data. */
+    error ERROR_VERIFY_SEGMENT;             /** Provided segment data failed verification against the hash table segment. */
+    error ERROR_VERIFY_SIGNATURE;           /** Failed to verify the hash table segment of the provided image. */
+    error ERROR_OEM_UNSIGNED;               /** Image is not OEM signed, but user included ENFORCE_OEM_SIGNED in the enforcement policy. */
+    error ERROR_QTI_UNSIGNED;               /** Image is not QTI signed, but user included ENFORCE_QTI_SIGNED in the enforcement policy. */
+    error ERROR_OEM_UNENCRYPTED;            /** Image is not OEM encrypted, but user included ENFORCE_OEM_ENCRYPTED in the enforcement policy. */
+    error ERROR_HW_KEY_FACTORY_OPEN;        /** Failed to open the Hardware Key Factory service. */
+    error ERROR_HW_KEY_FACTORY_DERIVE;      /** Failed to derive a key from hardware source. */
+    error ERROR_KEY_MANAGER_OPEN;           /** Failed to open the Key Manager service. */
+    error ERROR_KEY_MANAGER_SET_PARAM;      /** Failed to set a parameter in the Key Manager service. */
+    error ERROR_KEY_MANAGER_GENERATE_KEY;   /** Failed to pass some parameter to the Key Manager service. */
+    error ERROR_KEY_MANAGER_GET_PARAM;      /** Failed to get some parameter from the Key Manager service. */
+    error ERROR_KEY_ACCESS;                 /** Failed to obtain a key because it is not available in software. */
+    error ERROR_GET_KEY;                    /** Failed to obtain a key. */
+    error ERROR_KEY_SIZE;                   /** Obtained key is not of the expected size. */
+    error ERROR_EXTRACT_SECONDARY_SW_ID;    /** Failed to extract the Secondary Software ID from the provided image. */
+    error ERROR_EXTRACT_FEATURE_ID;         /** Failed to extract the Feature ID from the provided image. */
+    error ERROR_FEATURE_ID_MISMATCH;        /** The image's Feature ID does not match that provided by the user. */
+    error ERROR_DECRYPT;                    /** Failed to decrypt segment data. */
+    error ERROR_CREDENTIALS;                /** User provided credentials object is invalid. */
+    error ERROR_CREDENTIALS_DID;            /** Failed to obtain a Distinguished ID from the provided credentials object. */
+    error ERROR_UIE_CXT;                    /** Failed to initialize a UIE context. */
+    error ERROR_MEMORY_COPY;                /** Failed to copy memory. */
+    error ERROR_MEM_REGION_OPEN;            /** Failed to bind to a memory object. */
+    error ERROR_MEMORY_MAP;                 /** Failed to map a memory object. */
+    error ERROR_IMAGE_UNVERIFIED;           /** Attempted to access verification information about an unverified image. */
+    error ERROR_CTX_DTOR;                   /** Failed to clean up a context. */
+    error ERROR_HASH_TABLE_SEGMENT_VERSION; /** Image has an unsupported Hash Table Segment version. */
+    error ERROR_QBEC_CXT;                   /** Failed to initialize a QBEC context. */
+    error ERROR_QBEC_PARAMETER;             /** Failed to get QBEC parameters from Hash Table Segment. */
+    error ERROR_QBEC_PUBLIC_KEY;            /** Failed to extract QBEC public key from device. */
+    error ERROR_INVALID_QBEC_FEATURE_ID;    /** Error returned for QBEC FEATURE_ID request. */
+    error ERROR_INVALID_ENFORCEMENT_POLICY; /** Invalid Enforcement Policy is set. */
+    error ERROR_INVALID_ENCRYPTION_SCHEME;  /** Invalid Encryption Scheme. */
+    error ERROR_QBEC_SET_KEY_CONTEXT;       /** Failed to set QBEC key context. */
+    error ERROR_DECRYPT_UNSUPPORTED;        /** Segment decryption not supported for image format. */
+    error ERROR_FEATURE_UNSUPPORTED;        /** Requested feature is not supported. */
+    error ERROR_OEM_PRODUCT_SEED_NOT_BLOWN; /** OEM_PRODUCT_SEED has not been blown to QFPROM fuses. */
+    error ERROR_RSA_KEY_PARSING_FAILED;     /** Failed to parse the RSA key which was provided to encrypt the AES boot image encryption key */
+    error ERROR_RSA_ENCRYPTION_FAILED;      /** RSA encryption of the AES boot image encryption key failed. */
+
+    /** Should be used with getIntParameter().
+      * IDs for OU/Metadata OEM-specific outputs. */
+    const uint32 PARAM_OUT_OEM_AR_VERSION = 0;
+
+    /** Should be used with getIntParameter().
+      * IDs for OU/Metadata QTI-specific outputs. */
+    const uint32 PARAM_OUT_QTI_AR_VERSION = 10;
+
+    /** Should be used with getIntParameter().
+      * IDs for signing authority. Specified which authorities signed and/or encrypted the image. */
+    const uint32 PARAM_OUT_AUTHORITIES = 20;
+
+    /** Should be used with getBufParameter().
+      * IDs for RoT outputs. */
+    const uint32 PARAM_OUT_OEM_ROT = 30;
+
+    /** Should be used with getIntParameter().
+      * IDs for QBEC FEATURE_ID output. */
+    const uint32 PARAM_OUT_QBEC_FEATURE_ID = 40;
+
+    /** Should be used with getBufParameter().
+      * This returns a buffer containing QBEC Data Encryption parameters along with the wrapped encryption key.
+      * The wrapped encryption key is of length 68 bytes and the Data Encryption parameter is of size (16 + N*(12+16)) bytes
+      * where N is the number of encrypted segments. This is only available for certain QBEC_KM_SCHEME_IDs. */
+    const uint32 PARAM_OUT_QBEC_WRAPPED_ENC_KEY = 41;
+
+    /** Should be used with getIntParameter().
+      * The Key Management Scheme ID from QBEC. Use this to determine the key format. */
+    const uint32 PARAM_OUT_QBEC_KM_SCHEME_ID = 42;
+
+    /** Should be used with getIntParameter().
+      * The Data Encryption Scheme ID from QBEC. Use this to determine the data encryption parameter format. */
+    const uint32 PARAM_OUT_QBEC_DE_SCHEME_ID = 43;
+
+    /** Should be called with getBufParameter().
+      * This returns an unwrapped software key from the QBEC struct used for decryption.
+      * Note that a software key is inherently less secure than a hardware key! This is only available for certain QBEC_KM_SCHEME_IDs. */
+    const uint32 PARAM_OUT_QBEC_UNWRAPPED_SW_KEY = 50;
+
+    /** Should be used with getObjParameter().
+      * This returns a hardware key derived from the QBEC struct used for decryption.
+      * This is only available for certain QBEC_KM_SCHEME_IDs. */
+    const uint32 PARAM_OUT_QBEC_UNWRAPPED_KEY_OBJ = 51;
+
+    /** Should be called with getBufParameter().
+      * This returns the bitmask of the encrypted segments, and should be called after getting the number of segments in the image.
+      * The number of segments can be determined by calling getElfHeader() and reading the e_phnum member of the
+      * ISecureImage_elfHeader output structure. This bitmask is in little endian order and always a multiple of 4 bytes (uint32).
+      * The output buffer needs at most 4*(ceil((e_phnum-1)/32)+1) bytes. Count the number of set bits (popcount) to determine
+      * the number of encrypted segments. This is only available for certain QBEC_DE_SCHEME_IDs. */
+    const uint32 PARAM_OUT_QBEC_ENC_SEG_BITMASK = 60;
+
+    /** Should be called with getBufParameter().
+      * This returns the initialization vectors and authentication tags for each encrypted segment as described by PARAM_OUT_QBEC_ENC_SEG_BITMASK.
+      * The size of this parameter is 28*N bytes where N is the number of set bits in the output of PARAM_OUT_QBEC_ENC_SEG_BITMASK. These are output as
+      * [IV_0, TAG_0, IV_1, TAG_1, ..., IV_N-1, TAG_N-1] where each IV is 12 bytes and each authentication tag is 16 bytes.
+      * This is only available for certain QBEC_DE_SCHEME_IDs. */
+    const uint32 PARAM_OUT_QBEC_GCM_IVS_AUTH_TAGS = 61;
+
+    /* Bitmask values that can be used to determine which authorities signed and/or encrypted the image when PARAM_OUT_AUTHORITIES is requested from getIntParameter(). */
+    const uint32 OEM_SIGNED    = 0x1;
+    const uint32 QTI_SIGNED    = 0x2;
+    const uint64 OEM_ENCRYPTED = 0x4;
+
+    /* Encryption schemes which can be used as the encryption_scheme member of ISecureImage_verifyInputs. */
+    const uint32 ENCRYPTION_SCHEME_NONE       = 0; /* Ignores decryptionSoftwareContext. */
+    const uint32 ENCRYPTION_SCHEME_IPP_LEGACY = 1; /* Ignores decryptionSoftwareContext. */
+    const uint32 ENCRYPTION_SCHEME_IPP_HLOS   = 2; /* Ignores decryptionSoftwareContext. */
+    const uint32 ENCRYPTION_SCHEME_LLM_IPP    = 3;
+
+    /* Enforcement policy values which can be used as the enforcement_policy member of ISecureImage_verifyInputs. */
+    const uint64 ENFORCE_NONE              = 0x0;
+    const uint64 ENFORCE_OEM_SIGNED        = 0x1;
+    const uint64 ENFORCE_QTI_SIGNED        = 0x2;
+    const uint64 ENFORCE_OEM_ENCRYPTED     = 0x4;
+    const uint64 IGNORE_SECONDARY_SW_ID    = 0x20;
+    const uint64 IGNORE_OEM_AR_VERSION     = 0x40;
+    const uint64 IGNORE_QTI_AR_VERSION     = 0x80;
+    const uint64 IGNORE_FEATURE_ID         = 0x100;
+
+    /* Below are REQUIRED for HLOS owned IP Protection and LLM IP Protection features and are not allowed for other use cases. */
+    /* If this is enabled, ELF will not go through verification and will return success. */
+    const uint64 SKIP_AUTHENTICATION = 0x200;
+    /* Skip segment decryption when an ELF containing encrypted segments is provided. Encryption Parameters will be parsed and validated if they exist.*/
+    const uint64 SKIP_SEGMENT_DECRYPTION = 0x400;
+
+    /* Service Version Numbers. */
+    const uint32 SERVICE_MAJOR_VERSION = 1;
+    const uint32 SERVICE_MINOR_VERSION = 4;
+
+    /**
+      * Returns the version of the ISecureImage service.
+      * This is just a convenience method. Version mismatch is not a problem with Mink IPC.
+      * If a caller asks for a method that is not implemented, Mink provides a "not implemented" error.
+      * However, in some cases, this could be used to determine the root cause of the mismatch. For example,
+      * to report mismatched interface versions in the log.
+      *
+      * @param[out] majorVersion    The SERVICE_MAJOR_VERSION (see above) of the service.
+      * @param[out] minorVersion    The SERVICE_MINOR_VERSION (see above) of the service.
+      *
+      * @return Object_OK on success. Any other ISecureImage error code on failure.
+      */
+    method getServiceVersion(out uint32 majorVersion, out uint32 minorVersion);
+
+    /**
+      * Verifies the provided ELF and decrypts it if encrypted. Returns an IVerifiedSecureImageELFInfo Object which allows the caller to get information about the verified ELF.
+      *
+      * @param[in]  elf                           The ELF image to verify and decrypt, if encrypted.
+      * @param[in]  decryptionSoftwareContext     Software Context to use for decryption of the ELF, if encrypted. Ignored by some Encryption Schemes.
+      * @param[in]  verifyInputs                  ISecureImage_verifyInputs struct containing the enforcement policy and other verification constraints.
+      * @param[out] verifiedSecureImageElfInfo    Object which allows the caller to get information about the verified ELF.
+      *
+      * @return Object_OK on success. Any other ISecureImage error code on failure.
+      */
+    method verifyELFFromMemObj(in IMemRegion elf, in buffer decryptionSoftwareContext, in ISecureImage_verifyInputs verifyInputs,
+                              out IVerifiedSecureImageELFInfo verifiedSecureImageElfInfo);
+
+    /**
+      * Returns an ISecureImageELFInfo Object which allows the caller to get ELF Header and Program Header info without verifying the ELF.
+      *
+      * @param[in]  elf                   ELF image.
+      * @param[out] secureImageElfInfo    Object from which to retrieve image information, such as the ELF Header and Program Headers.
+      *
+      * @return Object_OK on success. Any other ISecureImage error code on failure.
+      */
+    method getSecureImageELFInfoFromMemObj(in IMemRegion elf, out ISecureImageELFInfo secureImageElfInfo);
+
+    /**
+      * Returns the encryption public key for the Encryption Scheme, Software Context, and Feature ID provided.
+      *
+      * @param[in]  encryptionScheme             One of the encryption schemes enumerated elsewhere in this documentation.
+      * @param[in]  decryptionSoftwareContext    The Software Context for the desired public key. Ignored by some Encryption Schemes.
+      * @param[in]  featureId                    The Feature ID for the desired public key.
+      * @param[out] key                          The encryption public key for the Encryption Scheme, Software Context, and Feature ID provided.
+      *
+      * @return Object_OK on success. Any other ISecureImage error code on failure.
+      */
+    method getEncryptionPublicKey(in uint32 encryptionScheme, in buffer decryptionSoftwareContext, in uint32 featureId, out buffer key);
+
+/** @} */ /* end_addtogroup ISecureImageSnapshot */
+};
+
+/**
+ * Outer-level interface for parsing and optionally validating ELF and MDT images.
+ */
+ /** @cond */
+interface ISecureImage : ISecureImageSnapshot {
+/** @endcond */
+
+  /* Bit masks for supported feature values which will be returned by getSupportedFeatures() */
+  const uint64 SUPPORTS_QBEC                      = 0x1;
+  const uint64 SUPPORTS_GET_OEM_ROT               = 0x2;
+  const uint64 SUPPORTS_HLOS_IPP                  = 0x4;
+  const uint64 SUPPORTS_LLM_IPP                   = 0x8;
+  const uint64 SUPPORTS_AES_BOOT_IMAGE_ENCRYPTION = 0x10;
+
+  /**
+  * @addtogroup ISecureImage
+  * @{
+  */
+    /**
+      * Verifies the provided MDT. Returns an IVerifiedSecureImageMDTInfo Object which allows the caller to verify segments and get information about the verified MDT.
+      *
+      * @param[in]  mdt                           The MDT to verify.
+      * @param[in]  decryptionSoftwareContext     Software Context to use for decryption of the segments via the segment verification APIs, if encrypted. Ignored by some Encryption Schemes.
+      * @param[in]  verifyInputs                  ISecureImage_verifyInputs struct containing the enforcement policy and other verification constraints.
+      * @param[out] verifiedSecureImageMdtInfo    Object which allows the caller to verify segments and get information about the verified MDT.
+      *
+      * @return Object_OK on success. Any other ISecureImage error code on failure.
+      */
+    method verifyMDTFromBuf(in buffer mdt, in buffer decryptionSoftwareContext, in ISecureImage_verifyInputs verifyInputs,
+                            out IVerifiedSecureImageMDTInfo verifiedSecureImageMdtInfo);
+
+
+    /**
+      * Returns a uint64 value whose bits contain information about supported
+      * sub-features in the ISecureImage service.
+      *
+      * The behavior of certain methods will change based on which features a
+      * given target supports.
+      *
+      * @param[out] supportedFeatures   uint64 value whose bits indicate which sub-features are supported by the service
+      *
+      * @return Object_OK on success. Any other ISecureImage error code on failure.
+      */
+    method getSupportedFeatures(out uint64 supportedFeatures);
+
+    /**
+      * Returns the RSA-encrypted AES key used to encrypt boot images.
+      *
+      * @param[in]  featureId       The desired Feature ID to use for derivation of the AES key. The same Feature ID must be provided at time of boot image encryption for embedding within the Encryption Parameters of the image.
+      * @param[in]  rsaPublicKey    The RSA public key to encrypt the derived AES key. The corresponding RSA private key must be used to decrypt the key blob when the AES key is imported into an HSM.
+      *                             It is expected that the RSA public key is (1) 2048 bits in length, (2) encoded in PKCS1 ASN.1 DER format, (3) uses SHA256 hashing, and (4) uses PKCS1 OAEP padding
+      * @param[out] key             The RSA-encrypted AES key. The key blob should be imported into an HSM and decrypted using the HSM-protected RSA private key.
+      * @param[out] nonce           The nonce used in the derivation of the AES key. This nonce must be provided at time of boot image encryption for embedding within the Encryption Parameters of the image.
+      *
+      * @return Object_OK on success. Any other ISecureImage error code on failure.
+      */
+    method getAesBootImageEncryptionKey(in uint32 featureId, in buffer rsaPublicKey, out buffer key, out buffer nonce);
+/** @} */ /* end_addtogroup ISecureImage */
+};
+

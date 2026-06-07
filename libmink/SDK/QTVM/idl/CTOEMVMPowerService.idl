@@ -1,0 +1,19 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/**
+* @addtogroup CTOEMVMPowerService
+* @{
+  Class CTOEMVMPowerService implements \link IPowerService \endlink interface which is used by
+  OEMVM platform.
+
+  The class ID `PowerService` is a platform service in Mink daemon.
+*/
+
+// This class provides an interface to get wake lock from kernel which will stop kernel stepping
+// into low power mode.
+//
+
+const uint32 CTOEMVMPowerService_UID = 373;
+
+/** @} */

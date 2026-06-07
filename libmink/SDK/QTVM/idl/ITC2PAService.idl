@@ -1,0 +1,130 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/*===================================================================================
+FILE:  ITC2PAService.idl
+
+DESCRIPTION:  This file contains interface for invoking the ITC2PAService interface.
+
+=====================================================================================*/
+
+include "IMemObject.idl"
+
+interface IInputFiles
+{
+    /*=======================================================
+      Error Codes
+    =========================================================*/
+    error ERROR_INVALID_PARAMETER;
+    error ERROR_MEMORY_MAP;
+    error ERROR_OUT_OF_MEMORY;
+
+    method getFile(in buffer label, out IMemObject file);
+};
+
+interface IOutputFiles
+{
+    /*=======================================================
+      Error Codes
+    =========================================================*/
+    error ERROR_INVALID_PARAMETER;
+    error ERROR_MEMORY_MAP;
+
+    method getFile(in buffer label, in IMemObject file);
+};
+
+interface TC2PAService
+{
+    /*=======================================================
+      Error Codes
+    =========================================================*/
+    error ERROR_EXTRACT_DATA;
+    error ERROR_INVALID_MEDIA_TYPE;
+    error ERROR_INVALID_PARAMETER;
+    error ERROR_MEMORY_MAP;
+    error ERROR_MEMORY_SERVICE;
+    error ERROR_MINK_SERVER;
+    error ERROR_OUT_OF_MEMORY;
+    error ERROR_QWES_SERVICE;
+    error ERROR_WAKELOCK_SERVICE;
+
+    /*=======================================================
+      Error Codes for enroll
+    =========================================================*/
+    error ERROR_ENROLL_FAILED;
+    error ERROR_NETWORK_SERVICE;
+
+    /*=======================================================
+      Error Codes for sign media
+    =========================================================*/
+    error ERROR_ACCESS_CONTROL_SERVICE;
+    error ERROR_SIGN_MEDIA;
+
+    /*=======================================================
+      Error Codes for validate media
+    =========================================================*/
+    error ERROR_INVALID_MEDIA;
+    error ERROR_MANIFEST_CORRUPTED;
+    error ERROR_VALIDATION_FAILED;
+
+    /**
+      This method is used to enable C2PA services by enrolling this device and acquiring the
+      required certificates.
+
+      @param [in] buffer inParams Parameters like API Key, certificate terms, etc. used for
+                                  enrollment.
+
+      @param [in] IInputFiles inFiles Input files like QWES license file, etc. used for enrollment.
+
+      @return
+      Object_OK on success. Any other error code on failure.
+    **/
+
+    method enroll(in buffer inParams, in IInputFiles inFiles);
+
+    /**
+      This method is used to sign the input media file, some fixed assertions, custom
+      assertions into C2PA claims and return the media in a container format comprising of it all,
+      example JPEG for Camera Snapshots.
+
+      @param [in] buffer inParams Parameters like media type, height, width, etc. used for signing.
+
+      @param [in] IInputFiles inFiles Input media and other input files used for signing.
+
+      @param [in] buffer claims Additional assertion claims in CBOR format used for signing.
+
+      @param [in] IInputFiles claimFiles Additional assertion claims files used for signing.
+
+      @param [out] buffer outParams Output parameters like file size in CBOR format.
+
+      @param [out] IOutputFile outFiles Output media and other output files returned after signing.
+
+      @return
+      Object_OK on success. Any other error code on failure.
+    **/
+
+    method signMedia(in buffer inParams, in IInputFiles inFiles,
+                     in buffer claims, in IInputFiles claimFiles,
+                     out buffer outParams, out IOutputFiles outFiles);
+
+    /**
+      This method is used to validate the C2PA claims present inside the media file and
+      returns the validation report along with few of the requested assertions.
+
+      @param [in] buffer inParams Parameters like media type, file size, etc. used for validation.
+
+      @param [in] IInputFiles inFiles Input media and other input files used for validation.
+
+      @param [out] uint8 claimResult Claim validation result for output media.
+
+      @param [out] buffer outParams Output parameters in CBOR format.
+
+      @param [out] IOutputFiles outFiles Output report and other files like thumbnail file, etc.
+                                         used for validation.
+
+      @return
+      Object_OK on success. Any other error code on failure.
+    **/
+    method validateMedia(in buffer inParams, in IInputFiles inFiles,
+                         out uint8 claimResult, out buffer outParams, out IOutputFiles outFiles);
+};

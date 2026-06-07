@@ -1,0 +1,81 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/**
+ * Interface to the SMCInvoke Example App functionality.
+ */
+/** @cond */
+
+include "ICallbackObjectExample.idl"
+
+interface ISMCIExampleApp
+{
+  /** @endcond */
+
+  /**
+   * @addtogroup ISMCIExampleApp
+   * @{
+   */
+
+  /* Hash-related values to use in the ISMCIExampleApp_hashExample caller. */
+  const uint32 HASH_SHA256_SIZE = 32;
+  const uint32 HASH_SHA256 = 1;
+
+  /* ISMCIExampleApp error code definitions. */
+  error ERROR_INPUT_BUFFER_TOO_SMALL; ///< Input buffer from callee is too small.
+
+  /**
+    Run the IAdder examples, which showcase how to use a service.
+
+    @return
+    Object_OK on success.
+  */
+
+  method serviceExample();
+
+  /**
+    Compute a secure hash inside the TA using an IHash object.
+
+    @param[in]  plaintext   a plaintext buffer to be hashed
+    @param[in]  algorithm   the hashing algorithm to use
+    @param[out] hash        the hash of the input buffer
+
+    @return
+    Object_OK on success.
+  */
+
+  method computeHash(in buffer input, in uint32 algorithm, out buffer hash);
+
+  /**
+    Provide a memory object to the TA. The TA treats this memory object like a
+    null-terminated string; printing it and then modifying it.
+
+    @param[in] memObj  a memory object
+
+    @return
+    Object_OK on success.
+  */
+
+  method sharedMemoryExample(in interface memObj);
+
+  /**
+    Perform a callback object invocation on an ICallbackObjectExample object.
+
+    @param[in] callbackObj  An ICallbackObjectExample object that will be invoked.
+
+    @return
+    Object_OK on success.
+  */
+
+  method callbackObjectExample(in ICallbackObjectExample callbackObj);
+
+  /**
+    Registers the Log Sink that is implemented by the TA and run some basic tests.
+
+    @return
+    Object_OK on success.
+   */
+  method logSinkExample();
+
+  /* @} */ /* end_addtogroup ISMCIExampleApp */
+};

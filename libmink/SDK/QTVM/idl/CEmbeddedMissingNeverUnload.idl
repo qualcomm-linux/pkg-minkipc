@@ -1,0 +1,17 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/**
+* @addtogroup CEmbeddedMissingNeverUnload
+* @{
+  Class CEmbeddedMissingNeverUnload implements \link ITestService \endlink interface.
+
+  The class ID `TestService` is not included in the default privilege set. It needs to be added to the
+  privileges section in the metadata to allow the TP to use the CEmbeddedMissingNeverUnload class.
+*/
+
+// This UID intentially does not match with the services hosted by any platform service
+
+const uint32 CEmbeddedMissingNeverUnload_UID = 0x00FF0042;
+
+/** @} */

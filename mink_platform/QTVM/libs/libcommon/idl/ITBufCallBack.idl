@@ -1,0 +1,10 @@
+/** @file ITBufCallBack.idl */
+
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/**
+  ITBufCallBack is a callback to the allocator when buf is freed.
+*/
+interface ITBufCallBack {
+};

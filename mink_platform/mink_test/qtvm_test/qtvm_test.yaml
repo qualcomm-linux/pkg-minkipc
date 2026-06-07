@@ -1,0 +1,106 @@
+# Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+# SPDX-License-Identifier: BSD-3-Clause-Clear
+
+service:
+  id: 400
+  name: EmbeddedAllPrivilegeTestService
+  user: system
+  group: system
+  tmpfs: false
+  capabilities:
+  - BLOCK_SUSPEND
+  supplemental_groups:
+  - wakelock
+  mounts:
+  - /dev/socket,rw=true
+
+service:
+  id: 401
+  name: EmbeddedCommonTestService
+  user: system
+  group: system
+  tmpfs: false
+  capabilities:
+  - BLOCK_SUSPEND
+  supplemental_groups:
+  - wakelock
+  mounts:
+  - /dev/socket,rw=true
+
+service:
+  id: 402
+  name: EmbeddedStressTestService
+  user: system
+  group: system
+  tmpfs: false
+  capabilities:
+  - BLOCK_SUSPEND
+  supplemental_groups:
+  - wakelock
+  mounts:
+  - /dev/socket,rw=true
+
+service:
+  id: 403
+  name: EmbeddedNormalDeathTestService
+  user: system
+  group: system
+  tmpfs: false
+  capabilities:
+  - BLOCK_SUSPEND
+  supplemental_groups:
+  - wakelock
+  mounts:
+  - /dev/socket,rw=true
+
+service:
+  id: 404
+  name: EmbeddedSpareTestService
+  user: system
+  group: system
+  tmpfs: false
+  capabilities:
+  - BLOCK_SUSPEND
+  supplemental_groups:
+  - wakelock
+  mounts:
+  - /dev/socket,rw=true
+
+service:
+  id: 407
+  name: smcinvoke_qtvm_app
+  user: system
+  group: system
+  tmpfs: false
+  capabilities:
+  - BLOCK_SUSPEND
+  supplemental_groups:
+  - wakelock
+  mounts:
+  - /dev/socket,rw=true
+
+service:
+  id: 408
+  name: EmbeddedSpareTestService
+  user: system
+  group: system
+  tmpfs: false
+  capabilities:
+  - BLOCK_SUSPEND
+  supplemental_groups:
+  - wakelock
+  mounts:
+  - /dev/socket,rw=true
+
+service:
+  id: 407
+  name: smcinvoke_qtvm_app
+  user: system
+  group: system
+  tmpfs: false
+  capabilities:
+  - BLOCK_SUSPEND
+  supplemental_groups:
+  - wakelock
+  mounts:
+  - /dev/socket,rw=true

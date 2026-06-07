@@ -1,0 +1,14 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+/**
+* @addtogroup CIPPService
+* @{
+  Class CIPPService implements \link IIPPService \endlink interface.
+
+  The class ID `IPPService` is not included in the default privilege set. It needs to be added to the
+  privileges section in the metadata to allow the TA to use the CIPPService class.
+*/
+
+const uint32 CIPPService_UID = 237;
+
+/** @} */

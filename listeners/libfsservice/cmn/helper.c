@@ -9,6 +9,7 @@
 #include <mntent.h>
 #include <dirent.h>
 #include <libgen.h>
+#include <time.h>
 
 #include "cmn.h"
 #include "helper.h"
@@ -27,9 +28,37 @@ static char *gp_whitelist_paths[] = {
 	"/data/qwes/licenses/"
 };
 
+static bool should_log(void) {
+    static int tokens = 1; // Max burst
+    static long last_time = 0;
+    const int RATE_LIMIT_MS = 5000; // 5 second interval
+    const int MAX_BURST = 1;
+
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    long now = ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+
+    // Replenish tokens based on time passed
+    if (now - last_time > RATE_LIMIT_MS) {
+        tokens = MAX_BURST;
+        last_time = now;
+    }
+
+    if (tokens > 0) {
+        tokens--;
+        return true;
+    }
+    return false; // Rate limited
+}
+
+static void rate_limited_log(const char *msg) {
+    if (should_log()) {
+        MSGE("%s", msg);
+    }
+}
+
 bool is_persist_partition_mounted(void)
 {
-	bool ret = false;
 	FILE *f;
 	struct mntent *entry;
 
@@ -39,17 +68,18 @@ bool is_persist_partition_mounted(void)
 	}
 
 	while ((entry = getmntent(f))) {
-		if (strcmp(entry->mnt_dir, PERSIST_MOUNT_PATH) == 0) {
-			ret = true;
+		if (strcmp(entry->mnt_dir, PERSIST_MOUNT_PATH) == 0)
 			goto exit;
-		}
 	}
-	MSGE("Persist partition not mounted!\n");
+	rate_limited_log("WARN: Persist partition not mounted!\n"
+			 "WARN: Writing to root filesystem path /var/lib/tee..\n"
+			 "WARN: Secure files could be lost if root filesystem "
+			 "is corrupted or wiped out by administrator!\n");
 
 exit:
 	if (f)
 		endmntent(f);
-	return ret;
+	return true;
 }
 
 int check_dir_path(const char *path)
@@ -146,6 +176,51 @@ static void prepend_path(const char *prefix, const char *old_path,
 		strlcat(new_path, old_path, TZ_FILE_DIR_LEN);
 }
 
+/**
+ * @brief Check if the persist path needs to be modified.
+
+ * Some Trusted Applications pass legacy mount point paths for persist partition
+ * such as /var/persist. This function checks if the mount point path needs
+ * to be updated to re-direct to a new path, such as /var/lib/tee.
+ *
+ * @param path The path possibly prefixed with legacy mount point.
+ */
+static bool is_persist_path_need_modify(const char *path)
+{
+	int compare = 0;
+
+	if (!path)
+		return false;
+
+	compare = strncmp(OLD_PERSIST_MOUNT_PATH, path, strlen(OLD_PERSIST_MOUNT_PATH));
+	if (compare == 0) {
+		MSGD("%s is an old persist mount path\n", path);
+		return true;
+	}
+
+	MSGD("%s is not an old persist mount path\n", path);
+	return false;
+}
+
+/**
+ * @brief Modify the persist path to re-direct to a new mount point.
+
+ * Some Trusted Applications pass legacy mount point paths for persist partition
+ * such as /var/persist. This function modifies the mount point path to
+ * re-direct to a new path, such as /var/lib/tee.
+ *
+ * @param prefix The new mount point path (e.g., /var/lib/tee).
+ * @param old_path The original path with the legacy mount point.
+ * @param new_path The buffer to store the new path.
+ */
+static void modify_path(const char *prefix, const char *old_path,
+                        char *new_path)
+{
+	memset(new_path, 0, TZ_FILE_DIR_LEN);
+	strlcpy(new_path, prefix, TZ_FILE_DIR_LEN);
+	strlcat(new_path, old_path + strlen(OLD_PERSIST_MOUNT_PATH), TZ_FILE_DIR_LEN);
+}
+
 char *get_resolved_path(char *old_path, size_t old_len, char *new_path,
 			size_t new_len)
 {
@@ -169,6 +244,11 @@ char *get_resolved_path(char *old_path, size_t old_len, char *new_path,
 		     old_path, new_path);
 		MSGD("get_resolved_path : old_pathlen =%zu, new_vendor_path_len=%zu\n",
 		     strlen(old_path), strlen(new_path));
+		return new_path;
+	}
+
+	if (is_persist_path_need_modify(old_path)) {
+		modify_path(PERSIST_MOUNT_PATH, old_path, new_path);
 		return new_path;
 	}
 

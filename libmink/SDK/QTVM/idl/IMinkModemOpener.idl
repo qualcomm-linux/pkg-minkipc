@@ -1,0 +1,59 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/*================================================================
+FILE: IMinkModemOpener.idl
+
+DESCRIPTION: IMinkModemOpener.idl defines the interface for obtain
+the Opener for Modem and TEE communication.
+=================================================================*/
+
+/** @cond */
+interface IMinkModemOpener
+/** @endcond */
+{
+    /**
+     *@addtogroup IMinkModemOpener
+     *@{
+     */
+
+    /**
+      Obtain the Opener for Modem and TEE communication.
+
+      @param[in]  uid                   Mink services/UIDs hosted within corresponding Object.
+
+      @param[out] obj                   Mink used to open hosted services.
+
+      @return
+      Object_OK on success.
+    */
+    method open(in uint32 uid, out interface obj);
+
+    /**
+      Add the Object from the Modem to the Object Table.
+
+      @param[in]  inHandler             The Object from the Modem needs to be converted
+                                        into a handle in the Object Table.
+
+      @param[out] handle                Handle in the Object Table.
+
+      @return
+      Object_OK on success.
+    */
+    method register(in interface inHandler, out int32 handle);
+
+    /**
+      Release the Object from the Modem in the Object Table.
+
+      @param[in] handle                 Release the Object in OT according to the handle.
+
+      @return
+      Object_OK on success.
+    */
+    method unregister(in int32 handle);
+
+    /**
+     *end_addtogroup IMinkModemOpener
+     *@}
+     */
+};

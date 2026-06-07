@@ -1,0 +1,89 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/*===================================================================================
+FILE:  IIPPTestApp.idl
+
+DESCRIPTION: IIPPTestApp.idl defines the interface for HLOS test clients to use
+as an intermediary to IPPService. The benefit is that it simulates a QTVM app using
+the IPPService.
+=====================================================================================*/
+
+include "IMemObject.idl"
+include "IIPPService.idl"
+
+struct IPPTestApp_SessionSegmentInfo {
+    uint32 segmentIndex;        /* Segment Index according to PHDR table, the .b00 number with splitbins. */
+    uint32 priority;            /* Priority of segment to decrypt. */
+    uint32 inputMemobjIndex;    /* Index of the IMemObject the segment is in. */
+    uint32 outputMemobjIndex;   /* Index of the IMemObject to decrypt. Same as input for in-place. */
+    uint64 inputOffset;         /* Offset of the segment within the input memobj. */
+    uint64 outputOffset;        /* Offset of the segment within the output memobj. */
+    uint64 flags;               /* IPPSession Flags*/
+};
+
+struct IPPTestApp_SessionTimings {
+    uint64 createSession;          /* Time to crete a session (us). */
+    uint64[8] queueSegmentDecrypts; /* Time to queue all segments for each memobj. (us). */
+    uint64 waitForSegmentDecrypt;   /* Time spent waiting for segments to finish decrypting. */
+};
+
+/** @cond */
+interface IPPTestApp
+/** @endcond */
+{
+    /**
+     * Get a public key from the device through a QTVM app. Passthrough to IPPService.
+     *
+     * @param [in] buffer swContext Any HLOS context needed to be mixed in for key
+     *                              derivation.
+     * @param [out] buffer pubKey Public key extracted from a hardware bound key.
+     *
+     * @return
+     * Object_OK on success. Any other error code on failure.
+     */
+    method pubKeyTest(in buffer swContext, out buffer pubKey);
+
+    /**
+     * Decrypt the encrypted data segments contained in the elf through a QTVM app.
+     * Passthrough to IPPService.
+     *
+     * @param [in] buffer swContext Any HLOS context needed to be mixed in for key
+     *                              derivation.
+     * @param [in] MemObject encryptedBuffer Memory object pointing to the read elf.
+     * @param [in] MemObject decryptedBuffer Memory object pointing to the buffer where
+     *                       data will be decrypted. If inline decryption is needed,
+     *                       pass NULL.
+     * @param [out] uint32_t Offset of the decrypted buffer within the "input buffer" when
+     *                       inline decryption is chosen.
+     * @param [out] uint64_t True length of the buffer in the elf. This can be different from
+     *                       the length obtained from the fd due to QTVM alignment
+     *                       requirements.
+     *
+     * @return
+     * Object_OK on success. Any other error code on failure. Uses IPPService Error Codes.
+    */
+    method decryptTest(in buffer swContext, in IMemObject elfHandle, in IMemObject outHandle,
+                       out uint32 offset, out uint64 bufLen);
+
+    /**
+     * Decrypt the encrypted data segments contained in the elf through a QTVM app.
+     * A one-shot implementation for the IPPSession APIs.
+     *
+     * @param [in] buffer swContext Any HLOS context needed to be mixed in for key
+     *                              derivation.
+     * @param [in] buffer mdt The .mdt segment from split bins. Used to create a session.
+     * @param [in] MemObject[8] memobjs Memory object array containing the segments
+     *                                  that will be decrypted in-place. Unused Objects should
+     *                                  be Object_NULL and placed at the end of the buffer.
+     * @param [out] buffer seg_info Segment Information needed for an in-place operation.
+     *                              Segment Index refers to the .b## in the split-bins, PHDR index.
+     *                              Memobj Index refers to the index in the memobj list above.
+     *                              The offset of the beginning of the segment within the memobj.
+     * @param [out] uint64_t[10] time_us The amount of time it took to call the IPPSession APIs.
+     * @return
+     * Object_OK on success. Any other error code on failure. Uses IPPSession Error Codes.
+    */
+    method decryptSessionTest(in buffer swContext, in buffer mdt, in IMemObject[8] memobjs,
+                              in IPPTestApp_SessionSegmentInfo[] seg_info, out IPPTestApp_SessionTimings timings);
+};

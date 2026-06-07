@@ -1,0 +1,5 @@
+{
+    "appName": "EmbeddedCommonTestService",
+    "neverUnload": "true",
+    "services": ["EmbeddedCommonTestService"]
+}

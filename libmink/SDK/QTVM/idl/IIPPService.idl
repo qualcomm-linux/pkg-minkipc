@@ -1,0 +1,165 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/*===================================================================================
+FILE:  IIPPService.idl
+
+DESCRIPTION: IIPPService.idl defines the interface for IP Protection service
+running in QTVM that will expose interfaces to QTVM TAs for any MBN decryption.
+=====================================================================================*/
+
+include "IMemObject.idl"
+
+struct IPPSessionSegmentInfo {
+    uint32 segmentIndex; /* Segment index within the MBN (Program Header index), with split-bins, this is the .b## index.  */
+    uint32 priority; /* Increase this value to prioritize this segment. */
+    uint64 inputOffset; /* Offset of the segment within the input FD */
+    uint64 outputOffset; /* Offset of the segment within the output FD, same as in for inline */
+    uint64 flags; /* Reserved field for potential expansion, this should be 0. */
+};
+
+/** @cond */
+interface IPPSession
+/** @endcond */
+{
+
+    /**
+    * @addtogroup IPPSession
+    * @{
+    */
+    const uint64 FLAG_MBN_FORMAT = 1; /* Must be created with one memobj containing the MBN, and empty segment info. */
+
+    /** @cond */
+    /* IPPService error codes */
+    error ERROR_MAC_FAILED; /* One of the encrypted segments is corrupted. */
+    error ERROR_INVALID_MEMOBJ; /* MemObject could not be unwrapped. */
+    error ERROR_MAPPING_MEMOBJ; /* MemObject could not be mapped. */
+    error ERROR_SETUP_CONSTRUCTING_METADATA; /* Failed to create MDT from MBN. */
+    error ERROR_SETUP_VERIFYING_METADATA; /* MDT could not be verified. */
+    error ERROR_SETUP_GET_KEY; /* Could not obtain key from MDT. */
+    error ERROR_SETUP_GET_DECRYPT_PARAMS; /* Could not get decrypt parameters from MDT. */
+    error ERROR_SEGMENT_INDEX_OOB; /* segment_index in IPPSessionSegmentInfo is more than total number of segments. */
+    error ERROR_SEGMENT_NOT_CONTAINED; /* Segment is not contained by either in/out memory object. */
+    /** @endcond */
+
+    /**
+     * Wait for a set of segments to be available. Encrypted segments will wait for the segment to
+     * be decrypted, unencrypted segments will immediately return.
+     * If any error occurs, this returns immediately.
+     *
+     * @param [in] uint32[] segment_indices List of segment indices according to IPPSessionSegmentInfo.segment_index
+     *                                      Waits for ALL segment indices listed.
+     *                                      If no segment indices listed, wait for all segments.
+     *
+     * @return
+     * Object_OK on success
+     * ERROR_SEGMENT_* if any of the segment_index segments report an error. Reports the first error seen.
+     * ERROR_SETUP_* if there were any setup issues with the session, decrypt was never attempted.
+     * Any other error code on failure.
+     */
+    method waitForSegmentDecrypt(in uint32[] segment_indices);
+
+    /**
+     * Add IMemObjects to the session for later reference with the segment info.
+     *
+     * @param [in] IMemObject input Memory object containing some encrypted segments.
+     * @param [in] IMemObject output Optional memory object for the output when using non-inline encryption.
+     * @param [in] SegmentInfo seg_info List of segments within this memory object.
+     *                                  Encrypted Segments are queued for decryption.
+     *                                  Unencrypted segments are ignored.
+     * @return
+     * Object_OK on success
+     * ERROR_INVALID_MEMOBJ if memobject could not be unwrapped.
+     * ERROR_MAPPING_MEMOBJ if memobject could not be mapped.
+     * ERROR_SEGMENT_INDEX_OOB if segment index is out of bounds according to MDT.
+     * ERROR_SEGMENT_NOT_CONTAINED if offset/size of segment does not fit within either dmabuf.
+     * @details
+     * IMemObject is safe to use after calling waitForSegmentDecrypt() with all segments passed to it.
+     */
+    method queueSegmentDecrypt(in IMemObject input, in IMemObject output, in IPPSessionSegmentInfo[] seg_info);
+    /** @} */ /* end_addtogroup IPPSession */
+};
+
+/** @cond */
+interface IPPService
+/** @endcond */
+{
+
+    /**
+    * @addtogroup IPPService
+    * @{
+    */
+
+    /** @cond */
+    /* IPPService error codes */
+    error ERROR_PUBKEY_EXTRACT;
+    error ERROR_DECRYPT;
+    error ERROR_INVALID_ELF_FD;
+    error ERROR_SECIMG_COMMUNICATION;
+    error ERROR_MAPPING_FD;
+    error ERROR_PARSING_METADATA;
+    error ERROR_PARSING_DECRYPT_PARAMS;
+    /** @endcond */
+
+    /**
+     *  Get a public key from the device.
+     *
+     * @param [in] buffer swContext Any HLOS context needed to be mixed in for key
+     *                              derivation.
+     * @param [out] buffer pubKey Public key extracted from a hardware bound key.
+     *
+     * @return
+     * Object_OK on success. Any other error code on failure.
+     */
+    method getPublicKey(in buffer swContext, out buffer pubKey);
+
+    /**
+     * Decrypt the encrypted data segments contained in the MBN.
+     * All the necessary information required to decrypt would be contained in the MBN,
+     * so passing the MemObject for the MBN is sufficient. The expected encrypted MBN
+     * should be in the Qualcomm QBEC format generated using sectools offline. This
+     * will make sure all the necessary headers and data segments are inserted in the
+     * MBN in the expected QBEC format.
+     *
+     * @param [in] buffer swContext Any HLOS context needed to be mixed in for key
+     *                              derivation.
+     * @param [in] MemObject encryptedBuffer Memory object pointing to the read MBN.
+     * @param [in] MemObject decryptedBuffer Memory object pointing to the buffer where
+     *                       data will be decrypted. If inline decryption is needed,
+     *                       pass NULL.
+     * @param [out] uint32_t Offset of the decrypted buffer within the "input buffer" when
+     *                       inline decryption is chosen.
+     * @param [out] uint64_t True length of the buffer in the MBN. This can be different from
+     *                       the length obtained from the fd due to QTVM alignment
+     *                       requirements.
+     *
+     * @return
+     * Object_OK on success. Any other error code on failure.
+    */
+    method decrypt(in buffer swContext, in IMemObject encryptedBuffer,
+                   in IMemObject decryptedBuffer, out uint32 offset,
+                   out uint64 bufLen);
+
+    /**
+     * Create a session to decrypt the encrypted data segments contained in the MBN or split-bins.
+     * All the necessary information required to decrypt would be contained in the MBN,
+     * so passing the MemObject for the MBN is sufficient. When using split-bins, more information
+     * is needed, so we require passing the MDT, along withh the offsets of each segment (.b##)
+     * within the IMemObject it is contained. The expected encrypted MBN/MDT
+     * should be in the Qualcomm QBEC format generated using sectools offline. This
+     * will make sure all the necessary headers and data segments are inserted in the
+     * MBN/MDT in the expected QBEC format.
+     *
+     * @param [in] buffer swContext Any HLOS context needed to be mixed in for key derivation.
+     * @param [in] buffer mdt Buffer containing the MDT of the encrypted MBN from sectools. This
+     *                        can be obtained with the --split_bins option in sectools, (.mdt).
+     *                        Ignored if using IPPSession::FLAG_MBN_FORMAT.
+     * @param [in] uint64_t flags IPPSession::FLAG_* to start the IPPSession
+     * @param [out] IPPSession session A new session handle, used to wait for decrypt to finish.
+     * @return
+     * Object_OK on success. Any other error code on failure.
+    */
+    method createSession(in buffer swContext, in buffer mdt, in uint64 flags,
+                         out IPPSession session);
+    /** @} */ /* end_addtogroup IPPService */
+};

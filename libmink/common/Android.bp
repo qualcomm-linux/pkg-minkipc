@@ -1,0 +1,7 @@
+rust_library_rlib {
+    name: "libmink_rs",
+    crate_name: "mink",
+    srcs: ["rust/lib.rs"],
+    lints: "none",
+    clippy_lints: "none"
+}

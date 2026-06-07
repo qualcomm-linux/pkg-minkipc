@@ -1,0 +1,16 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/**
+* @addtogroup CTOEMVMAccessControl
+* @{
+  Class CTOEMVMAccessControl implements \link ITAccessControl \endlink interface.
+
+  The class ID `CTOEMVMAccessControl_UID` is a Platform Service in OEMVM.
+*/
+
+// This class provides an interface to do access control.
+
+const uint32 CTOEMVMAccessControl_UID = 440;
+
+/** @} */

@@ -1,0 +1,5 @@
+{
+    "appName": "EmbeddedNormalDeathTestService",
+    "neverUnload": "true",
+    "services": ["EmbeddedNormalDeathTestService"]
+}

@@ -1,0 +1,68 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/*===================================================================================
+FILE: IC2PAInternetService.idl
+
+DESCRIPTION:  This file contains interface for invoking the IC2PAInternetService
+interface.
+
+=====================================================================================*/
+
+interface IC2PAInternetService
+{
+    /*=======================================================
+      Error Codes
+    =========================================================*/
+    error ERROR_EXTRACT_DATA;
+    error ERROR_INVALID_PARAMETER;
+    error ERROR_NETWORK_SETUP;
+    error ERROR_NETWORK_ACCESS;
+
+    /**
+      This method is used to get nonce used for attestation report.
+
+      @param [out] buffer nonce 32 byte nonce value used to generate attestation report.
+
+      @return
+      Object_OK on success. Any other error code on failure.
+    **/
+    method sendNonceRequest(out buffer nonce);
+
+    /**
+      This method is used to get token certificate used for attestation report.
+
+      @param [out] buffer tokenCert Token certificate file used for generating token certificate.
+
+      @return
+      Object_OK on success. Any other error code on failure.
+    **/
+    method sendTokenCertRequest(out buffer tokenCert);
+
+    /**
+      This method is used to send attestation report to certificate authority server and get data
+      for CSR.
+
+      @param [in] buffer inParams Parameters like API Key, attestation report, etc. used for
+                                  getting CSR input data.
+
+      @param [out] buffer csrData Data to be used for sending CSR.
+
+      @return
+      Object_OK on success. Any other error code on failure.
+    **/
+    method sendAttestationReport(in buffer inParam, out buffer csrData);
+
+    /**
+      This method is used to send CSR data to certificate authority server and get certificate.
+
+      @param [in] buffer inParams Parameters like CSR, url, etc. used for getting CSR data to
+                                  certificate authority.
+
+      @param [out] buffer certificate Certificate file returned from certificate authority.
+
+      @return
+      Object_OK on success. Any other error code on failure.
+    **/
+    method sendCertificateRequest(in buffer inParam, out buffer certificate);
+};

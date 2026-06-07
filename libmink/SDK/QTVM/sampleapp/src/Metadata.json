@@ -1,0 +1,6 @@
+{
+    "appName": "sampleapp",
+    "neverUnload": "false",
+    "privileges": ["AppClient", "AppLoader", "Diagnostics", "TPowerService"],
+    "services": ["SampleService"]
+}

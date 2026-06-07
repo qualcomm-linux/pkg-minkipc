@@ -1,0 +1,4 @@
+{
+    "appName": "StressTestService",
+    "services": ["StressTestService"]
+}

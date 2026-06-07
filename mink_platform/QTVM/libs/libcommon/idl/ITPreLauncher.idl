@@ -1,0 +1,95 @@
+/** @file ITPreLauncher.idl */
+
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+include "ITAutoStartManager.idl"
+include "ITProcess.idl"
+include "ITProcessController.idl"
+
+const uint32 MAX_MDSTR_LEN = 100;
+
+struct ITPreLauncher_authData {
+  /** Root of Trust */
+  uint32     rot;
+  /** TODO: Signing authority? */
+  uint8[4]   domain;
+  /** SHA256 of the application binary */
+  uint8[32]  hash;
+};
+
+/**
+  ITPreLauncher parses metadata of a process and do some check before fork a new process.
+*/
+
+/** @cond */
+interface ITPreLauncher {
+/** @endcond */
+
+  /**
+   * @addtogroup ITPreLauncher
+   * @{
+   */
+
+  /*
+   * Error codes
+   */
+  /** @cond */
+  error ERROR_INVALID_BUFFER;                     /**< Buffer is invalid */
+  error ERROR_GET_AUTH_SVC;                       /**< Cannot get Auth service */
+  error ERROR_ELF_SIGNATURE_ERROR;                /**< Error in ELF or signature validation */
+  error ERROR_GET_ARB_VERSION;                    /**< Cannot get ARB version */
+  error ERROR_GET_RPMB_SVC;                       /**< Cannot get RPMB service */
+  error ERROR_RPMB_FAILURE;                       /**< Failure of RPMB operation */
+  error ERROR_ROLLBACK_FAILURE;                   /**< Fail to roll-back */
+  error ERROR_METADATA_INVALID;                   /**< Invalid metadata */
+  error ERROR_PROC_INVALID;                       /**< Invalid program data */
+  error ERROR_NO_NAME_IN_METADATA;                /**< Missing name in process metadata */
+  error ERROR_HEAP_MALLOC_FAILURE;                /**< TP loading failed due to heap exhaustion */
+  error ERROR_PROC_NOT_LOADED;                    /**< No loaded TP with distinguished name */
+  error ERROR_PROC_ALREADY_LOADED;                /**< TP with distinguished name is loaded */
+  error ERROR_PROC_BLACKLISTED;                   /**< Blacklisted process cannot be loaded */
+  error ERROR_EMBED_MISSING_PROPERTY;             /**< Property missing from metadata prevents launch */
+  /** @endcond */
+
+  /**
+    PreLoads a trusted process.
+    The process ELF binary is passed as a memory object.
+
+    @param[in]  memObj         Memory object containing ELF image.
+    @param[in]  cid            Container ID to determine SE Linux policy.
+    @param[out] pid            ID of launched process.
+    @param[out] mdStr          Metadata string parsed from ELF binary.
+    @param[out] tProcCtrlObj   An instance of process controller.
+                               TProcess Controller Object return to client, can be released using Object_Release() or Object_RELEASE_IF().
+    @param[out] tProcObj       An instance of a launched process.
+                               TProcess is a private Object return to TProcess Controller, can be released using Object_Release() or Object_RELEASE_IF().
+
+    @return  Object_OK if successful.
+    @return  ITPreLauncher_ERROR_INVALID_BUFFER memory object is NULL.
+    @return  ITPreLauncher_ERROR_METADATA_INVALID fail to parse metadata
+    @return  ITPreLauncher_ERROR_HEAP_MALLOC_FAILURE fail to malloc
+    @return  ITPreLauncher_ERROR_PROC_IS_LOADED if found that this process is loaded.
+    @return  Object_ERROR other error
+  */
+  method launch(in interface memObj, in uint32 cid, out uint32 pid, out uint8[] mdStr, out ITPreLauncher_authData data, out ITProcessController tProcCtrlObj, out ITProcess tProcObj);
+
+  /**
+    register the Notify Object and send to Root daemon in the end.
+
+    @param[in]  notify       Notify object that will be called by Root daemon when process died.
+  */
+  method registerNotify(in ITAutoStartManager notify);
+
+  /**
+    try to shutdown/restart qtvm.
+
+    @param[in] restart       indicate reboot or shutdown.A non-zero value indicates to reboot the VM.
+    @param[in] force         A non-zero value indicates to force reboot/shutdown the VM
+                             regardless of whether the service is running.
+    @return  shutdown/restart if successful.
+   */
+  method shutdown(in uint32 restart, in uint32 force);
+
+  /** @} */ /* end_addtogroup ITPreLauncher */
+};

@@ -1,0 +1,286 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/** @file  IDeviceAttestation.idl */
+
+/**
+ * IDAError provides a list of all the errors that might be returned
+ * by the methods of the IAttestationReport, IAttestationBuilder, and
+ * IDeviceAttestation interfaces.
+ */
+
+/** @cond */
+interface IDAError {
+/** @endcond */
+
+  /**
+   * @addtogroup IDAError
+   * @{
+   */
+
+  /* Device Attestation Error Codes */
+  error NO_MEMORY;                         /**< Failure during memory allocation */
+  error INVALID_BUFFER;                    /**< Null or zero-length buffer is passed */
+  error INVALID_CERTIFICATE;               /**< Passed certificate is invalid or it does not contain the correct feature ID */
+  error MAX_APP_DATA_LIMIT_REACHED;        /**< Maximum of 50KB cumulative app data can be added to generate a token */
+  error INVALID_SECURITY_LEVEL;            /**< Passed security level is not within the expected range or not allowed */
+  error INVALID_ATTESTATION_CONTEXT;       /**< Passed attestation context is not within the expected range */
+  error INVALID_SIGNING_KEY;               /**< Passed key type is not allowed */
+  error INVALID_NONCE;                     /**< Invalid nonce buffer or a nonce with an invalid length is passed */
+  error INVALID_REPORT_OFFSET;             /**< Offset exceeds the attestation report size */
+  error ATTESTATION_REPORT_FAILURE;        /**< Generic error that can be returned by any step while building the attestation report */
+  error WARM_UP_FAILURE;                   /**< Generic error that can be returned by any step while warming up any submod and retrieving its status */
+  error INVALID_PARAMS_CBOR;               /**< Invalid CBOR params */
+  error ADDON_CREDENTIALS_REPORT_NOT_SET;  /**< OPT_ADDON for CREDENTIALS_REPORT is not set */
+  error ADDON_QTEE_REPORT_NOT_SET;         /**< OPT_ADDON for QTEE_REPORT is not set */
+  error NOT_ALLOWED;                       /**< Generic error for a requested operation not being allowed */
+  error INVALID_FORMAT_TYPE;               /**< Passed format type is not within the expected range */
+
+  /** @} */ /* end_addtogroup IDAError */
+};
+
+/**
+ * IAttestationReport provides an interface to get the attestation bytes
+ * using IAttestationBuilder.
+ */
+
+/** @cond */
+interface IAttestationReport {
+/** @endcond */
+
+  /**
+   * @addtogroup IAttestationReport
+   * @{
+   */
+
+  /**
+    Gets the full size of the signed and encrypted attestation.
+
+    @param[out] attestationReportSize    Size of the attestation report.
+
+    @return
+    Object_OK on success.
+  */
+  method getSize(out uint64 attestationReportSize);
+
+  /**
+    Gets the bytes in the attestation.
+
+    @param[in]  offset         Attestation offset.
+    @param[out] attestation    Attestation buffer.
+
+    @detdesc
+    Typical use is to get the size and then call this in a loop with
+    a 4KB buffer incrementing the offset by the number of bytes returned
+    until all the bytes have been fetched.
+    @par
+    The caller should keep track of the bytes fetched to know when they
+    have got them all.  There is no "end of file" return code.
+    @par
+    A buffer larger than 4KB may be used with some implementations. If
+    the buffer is too large for the underlying IPC mechanism, then an
+    error will be returned.
+    @par
+    An error will be returned if offset is not in the range of 0 and the
+    size of the attestation.
+    @par
+    The attestation is an encrypted data blob. There is no use for part of a
+    attestation because it cannot be decrypted; therefore, the
+    full attestation must be fetched.
+
+    @return
+    Object_OK on success.
+  */
+  method getBytes(in uint64 offset, out buffer attestation);
+
+  /** @} */ /* end_addtogroup IAttestationReport */
+};
+
+/**
+ * IAttestationBuilder provides an interface to build the attestation
+ * using IDeviceAttestation.
+ */
+
+/** @cond */
+interface IAttestationBuilder {
+/** @endcond */
+
+  /** @cond */
+
+  /**
+   * Security levels to tag both the client and individual submodules' data
+   */
+  const uint32 SECURITY_LEVEL_UNRESTRICTED                  = 1;
+  const uint32 SECURITY_LEVEL_RESTRICTED                    = 2;
+  const uint32 SECURITY_LEVEL_SECURERESTRICTED              = 3;
+  const uint32 SECURITY_LEVEL_HARDWARE                      = 4;
+
+  /**
+   * Contexts to indicate the attestation's purpose
+   */
+  const uint32 ATTESTATION_CONTEXT_GENERIC                  = 1;
+  const uint32 ATTESTATION_CONTEXT_REGISTRATION             = 2;
+  const uint32 ATTESTATION_CONTEXT_PROVISIONING             = 3;
+  const uint32 ATTESTATION_CONTEXT_CERT_ISSUANCE            = 4;
+  const uint32 ATTESTATION_CONTEXT_PROOF_OF_POSSESSION      = 5;
+  const uint32 ATTESTATION_CONTEXT_LICENSING                = 6;
+
+  /**
+   * Options to select the addon features
+   */
+  const uint64 OPT_ADDON_NONE                               = 0x0000000000000000;
+  const uint64 OPT_ADDON_LOCATION                           = 0x0000000000000001;
+  const uint64 OPT_ADDON_RTIC_LEGACY                        = 0x0000000000000002;
+  const uint64 OPT_ADDON_TRUSTEDTIME                        = 0x0000000000000004;
+  const uint64 OPT_ADDON_CONNSEC_CSR                        = 0x0000000000000008;
+  const uint64 OPT_ADDON_TMEHW                              = 0x0000000000000010;
+  const uint64 OPT_ADDON_QRKS_WITH_BASIC_INTEGRITY          = 0x0000000000000020;
+  const uint64 OPT_ADDON_QRKS_WITH_KP_INCIDENT              = 0x0000000000000040;
+  const uint64 OPT_ADDON_PERIPHERAL                         = 0x0000000000000080;
+  const uint64 OPT_ADDON_CONNSEC_CDR                        = 0x0000000000000100;
+  const uint64 OPT_ADDON_ENTITY_REPORT                      = 0x0000000000000200;
+  const uint64 OPT_ADDON_QTEE_REPORT                        = 0x0000000000000400;
+  const uint64 OPT_ADDON_CREDENTIAL_REPORT                  = 0x0000000000000800;
+  const uint64 OPT_ADDON_LEGACY_HWATTESTATION_REPORT        = 0x0000000000001000;
+  const uint64 OPT_ADDON_HLOS_BM_REPORT                     = 0x0000000000002000;
+  const uint64 OPT_ADDON_PLATFORM_BM_REPORT                 = 0x0000000000004000;
+  const uint64 OPT_ADDON_PPID_REPORT                        = 0x0000000000008000;
+  const uint64 OPT_ADDON_NIST                               = 0x0000000000010000;
+  const uint64 OPT_ADDON_VM                                 = 0x0000000000020000;
+  const uint64 OPT_ADDON_ALL                                = 0xFF00000000000000;
+
+  /**
+   * Attestation formats
+   */
+  const uint32 FORMAT_EAT                                   = 1;
+
+  /**
+   * Signing key types
+   */
+  const uint32 KEY_DEMO                                     = 1;
+  const uint32 KEY_QDAK                                     = 2;
+
+  /** @endcond */
+
+  /**
+   * @addtogroup IAttestationBuilder
+   * @{
+   */
+
+  /**
+    Clears the labeled client data in the attestation builder.
+
+    @return
+    Object_OK on success.
+  */
+  method clearBytes();
+
+  /**
+    Adds any client/user specific data as blob.
+
+    @param[in] securityLevel    One of SECURITY_LEVEL_*.
+    @param[in] label            String to tag the item. The string does not have to be null-terminated.
+    @param[in] bytes            Data bytes to be added.
+
+    @return
+    Object_OK on success.
+  */
+  method addBytes(in uint32 securityLevel, in int8[] label, in buffer bytes);
+
+  /**
+    Builds the full size of the signed and encrypted attestation.
+
+    @param[in]  attestationContext    Attestation contexts.
+    @param[in]  ADDONOptions          OPT_ADDON_LOCATION, OPT_ADDON_RTIC, etc. or-ed together.
+    @param[in]  formatType            Attestation formats.
+    @param[in]  keyType               Signing key types.
+    @param[in]  nonce                 Buffer containing nonce.
+    @param[out] reportStatus          Bitmap showing which addon options were successfully fetched.
+    @param[out] attestationReport     \link IAttestationReport \endlink object containing attestation.
+
+    @return
+    Object_OK on success.
+  */
+  method build(in uint32 attestationContext, in uint64 ADDONOptions, in uint32 formatType, in uint32 keyType, in buffer nonce, out uint64 reportStatus, out IAttestationReport attestationReport);
+
+  /**
+    Set DA params (token_cert + nonce)
+
+    @param[in] DAParams               Buffer containing token_cert & nonce
+
+    @return
+    Object_OK on success.
+  */
+  method setDAParams(in buffer DAParams);
+
+  /** @} */ /* end_addtogroup IAttestationBuilder */
+};
+
+/**
+ * @section IDA_Overview IDA Overview
+ * Device Attestation provides APIs to create an attestation report containing
+ * a device's state information. The Device Attestation Report is signed and encrypted.
+ * Device Attestation is used in conjunction with QWES business-to-business (B2B) cloud
+ * APIs for verification and decode.
+ */
+
+/** @cond */
+interface IDeviceAttestation {
+/** @endcond */
+
+  /** @cond */
+
+  /**
+   * Labels used in RTIC warm-up status CBOR for individual freshness values corresponding to each RTIC data
+   */
+  const int32 RTIC_AGE_LABEL                = -77200;
+  const int32 TRUSTEDTIME_AGE_LABEL         = -77250;
+  const int32 LOCATION_AGE_LABEL            = -77270;
+  const int32 CONNSEC_CELLULAR_AGE_LABEL    = -77280;
+
+  /** @endcond */
+
+  /**
+   * @addtogroup IDeviceAttestation
+   * @{
+   */
+
+  /**
+    Starts creating an attestation.
+
+    @param[in]  licenseCert           Buffer containing license certificate.
+    @param[out] attestationBuilder    \link IAttestationBuilder \endlink object to construct an attestation.
+
+    @detdesc The license certificate must chain up to a license root to encrypt the attestation.
+
+    @return
+    Object_OK on success.
+  */
+  method start(in buffer licenseCert, out IAttestationBuilder attestationBuilder);
+
+  /**
+    Returns CBOR that shows the last time warming up completed for each individual optional
+    data requested by the client.
+
+    @param[out] warmUpStatus    Buffer containing warmup completion timestamps in CBOR format.
+
+    @return
+    Object_OK on success.
+  */
+  method getWarmUpStatus(out buffer warmUpStatus);
+
+  /**
+    Pokes at all necessary entities to prepare the relevant data, and initiates any other
+    warmup activity that might be applicable to the passed options.
+
+    @param[in] options     Options for the warmup.
+    @param[in] timeout     Time limit for the warmup to complete.
+    @param[in] callback    IDAWarmupCallback object to call when the warmup is done.
+
+    @return
+    Object_OK on success.
+  */
+  method warmUp(in uint64 options, in uint64 timeout, in interface callback);
+
+  /** @} */ /* end_addtogroup IDeviceAttestation */
+};

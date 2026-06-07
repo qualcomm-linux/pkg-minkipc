@@ -7,6 +7,9 @@
 #include "IRequestTABuffer.h"
 #include "taImageReader.h"
 #include "utils.h"
+#include <fstream>
+#include <string>
+#include <vector>
 
 using namespace std;
 
@@ -14,6 +17,66 @@ using namespace std;
 static const size_t HYPHEN_LEN(4);
 static const size_t NULLCHAR_LEN(1);
 static const size_t STRING_MULTIPLIER(2);
+
+/**
+ * @brief Parse the device compatible string for possible device names.
+ *
+ * @return A vector for possible device names.
+ */
+static vector<string> parseCompatibleList(const string& raw)
+{
+    vector<string> result;
+    size_t start = 0;
+
+    while (start < raw.size())
+    {
+        size_t end = raw.find('\0', start);
+        if (end == string::npos)
+            break;
+
+        string entry = raw.substr(start, end - start);
+
+        // Find vendor prefix separator
+        size_t comma_pos = entry.find(',');
+
+        if (comma_pos != string::npos && comma_pos + 1 < entry.size())
+        {
+            // Strip prefix 'qcom'
+            result.emplace_back(entry.substr(comma_pos + 1));
+        }
+        else
+        {
+            // No vendor prefix present
+            result.emplace_back(entry);
+        }
+
+        start = end + 1;
+    }
+
+    return result;
+}
+
+/**
+ * @brief Read the device compatible string
+ *
+ * @return Device compatible string delimited by \0.
+ */
+static string readCompatibleString()
+{
+    const char* path = "/sys/firmware/devicetree/base/compatible";
+
+    ifstream file(path, ios::in | ios::binary);
+    if (!file.is_open())
+    {
+        return {};
+    }
+
+    // Read entire file into a string
+    string data((std::istreambuf_iterator<char>(file)),
+                 std::istreambuf_iterator<char>());
+
+    return data;
+}
 
 /**
  * @brief Create CRequestTABBuffer and prepare TA binary search paths
@@ -31,9 +94,39 @@ static CRequestTABuffer *getCRequestTABuffer()
     {
       taPaths = taPaths + string("/");
     }
-    requestTABuff->searchLocations.push_back(taPaths);
-    MSGD("Path %s\n", taPaths.c_str());
+
+    if (taPaths.find("qtee-tas") != std::string::npos)
+    {
+      string updatedTaPath;
+      string raw = readCompatibleString();
+      if (raw.empty())
+      {
+        MSGE("Could not read device compatible string!\n");
+        goto out;
+      }
+
+      auto vec = parseCompatibleList(raw);
+      if (vec.empty())
+      {
+        MSGE("No device names found in compatible!\n");
+        goto out;
+      }
+
+      for (const auto& entry : vec)
+      {
+        updatedTaPath = taPaths + entry + string("/");
+        requestTABuff->searchLocations.push_back(updatedTaPath);
+        MSGD("Path %s\n", updatedTaPath.c_str());
+      }
+    }
+    else
+    {
+      requestTABuff->searchLocations.push_back(taPaths);
+      MSGD("Path %s\n", taPaths.c_str());
+    }
   }
+
+out:
   return requestTABuff;
 }
 

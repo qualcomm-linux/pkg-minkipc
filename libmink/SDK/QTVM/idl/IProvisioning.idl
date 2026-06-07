@@ -1,0 +1,316 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause-Clear
+
+/** @file IProvisioning.idl */
+
+include "IDeviceAttestation.idl"
+
+/** @cond */
+interface IProvError {
+/** @endcond */
+
+  /**
+    @addtogroup IProvError
+    @{
+   */
+
+  /* Provisioning Error Codes. */
+  error NO_MEMORY;                    /**< Failure during memory allocation. */
+  error INVALID_DA_CERTIFICATE;       /**< Invalid attestation certificate. */
+  error INVALID_CLOUD_CERTIFICATE;    /**< Invalid cloud certificate. */
+  error INVALID_ARGUMENT;             /**< Invalid arguments. */
+  error INVALID_PARAMS_CBOR;          /**< Invalid CBOR parameters. */
+  error NOT_SUPPORTED;                /**< Not supported. */
+  error KEY_LIST_FULL;                /**< Key list is full. */
+
+  /** @} */ /* end_addtogroup IProvError */
+};
+
+/** @cond */
+interface ICipherOperation {
+/** @endcond */
+
+  /**
+    @addtogroup ICipherOperation
+    @{
+   */
+
+  /**
+    Cipher operation - update, for encryption or decryption only.
+
+    @param[in]  input            Buffer containing input data for update cipher operation.
+    @param[in]  inParams         Reserved for future use.
+    @param[out] output           Buffer containing output data from update cipher operation.
+    @param[out] inputConsumed    It helps in knowing whether output buffer size is enough or not.
+
+    @return
+    Object_OK on success.
+  */
+  method update(in buffer input, in buffer inParams, out buffer output, out uint32 inputConsumed);
+
+  /**
+    Cipher operation - finish, for encryption or decryption only.
+
+    @param[in]  input       Buffer containing input data for finish cipher operation.
+    @param[in]  inParams    Reserved for future use.
+    @param[out] output      Buffer containing output data from finish cipher operation.
+
+    @return
+    Object_OK on success.
+  */
+  method finish(in buffer input, in buffer inParams, out buffer output);
+
+  /** @} */ /* end_addtogroup ICipherOperation */
+};
+
+/** @cond */
+interface IProvKeyList {
+/** @endcond */
+
+  /**
+    @addtogroup IProvKeyList
+    @{
+   */
+
+  /**
+    Adds the given key blob to the internal key list.
+
+    @param[in]  keyBlob        Buffer containing key material.
+    @param[in]  serviceCtx     Bytes that make sense to the 3rd party cloud and is passed along by the QWES cloud back to the 3rd party cloud.
+
+    @return
+    Object_OK on success.
+  */
+  method appendKey(in buffer keyBlob, in buffer serviceCtx);
+
+  /**
+    Clears the internal key list.
+
+    @return
+    Object_OK on success.
+  */
+  method clear();
+
+  /** @} */ /* end_addtogroup IProvKeyList */
+};
+
+/** @cond */
+interface IProvisioning {
+/** @endcond */
+
+  /**
+    @addtogroup IProvisioning
+    @{
+   */
+
+  /* Supported key types/algorithms. */
+  const uint32 KEY_TYPE_RSA                 = 0;      /**< RSA key. */
+  const uint32 KEY_TYPE_ECC                 = 1;      /**< ECC key. */
+  const uint32 KEY_TYPE_AES                 = 2;      /**< AES key. */
+
+  /* Supported key purposes. */
+  const uint32 KEY_PURPOSE_ENCRYPT          = 0;      /**< Encrypt purpose. */
+  const uint32 KEY_PURPOSE_DECRYPT          = 1;      /**< Decrypt purpose. */
+  const uint32 KEY_PURPOSE_SIGN             = 2;      /**< Sign purpose. */
+  const uint32 KEY_PURPOSE_VERIFY           = 3;      /**< Verify purpose. */
+  const uint32 KEY_PURPOSE_DERIVE_KEY       = 4;      /**< Derive key purpose. */
+
+  /* Supported RSA padding schemes. */
+  const uint32 PAD_RSA_OAEP                 = 1;      /**< OAEP padding. */
+  const uint32 PAD_RSA_PSS                  = 2;      /**< PSS padding. */
+
+  /* Supported RSA key sizes. */
+  const uint32 RSA2048_KEY_SIZE             = 2048;   /**< Key size 2048. */
+  const uint32 RSA4096_KEY_SIZE             = 4096;   /**< Key size 4096. */
+
+  /* Supported RSA public exponents. */
+  const uint32 RSA65537_PUB_EXP             = 65537;  /**< Public exponent 65537. */
+
+  /* Supported ECC curves. */
+  const uint32 EC_CURVE_P_256               = 1;      /**< p256. */
+  const uint32 EC_CURVE_P_384               = 2;      /**< p384. */
+  const uint32 EC_CURVE_P_521               = 3;      /**< p521. */
+
+  /* Supported hash algorithms. */
+  const uint32 DIGEST_SHA_2_256             = 4;      /**< SHA256. */
+  const uint32 DIGEST_SHA_2_384             = 5;      /**< SHA384. */
+  const uint32 DIGEST_SHA_2_512             = 6;      /**< SHA512. */
+
+  /* Tags to encode input keyParams to CBOR. */
+  const uint32 TAG_KEY_PURPOSE              = 1;      /**< CBOR tag, key purpose. */
+  const uint32 TAG_KEY_SIZE                 = 2;      /**< CBOR tag, key size. */
+  const uint32 TAG_PADDING                  = 3;      /**< CBOR tag, padding. */
+  const uint32 TAG_DIGEST                   = 4;      /**< CBOR tag, digest. */
+  const uint32 TAG_RSA_PUBLIC_EXPONENT      = 5;      /**< CBOR tag, public exponent. */
+  const uint32 TAG_BLOCK_MODE               = 7;      /**< CBOR tag, block mode. */
+  const uint32 TAG_EC_CURVE                 = 8;      /**< CBOR tag, ecc curve. */
+  const uint32 TAG_NONCE                    = 9;      /**< CBOR tag, nonce. */
+  const uint32 TAG_CALLER_NONCE             = 11;     /**< CBOR tag, caller nonce. */
+  const uint32 TAG_RSA_MGF1_DIGEST          = 12;     /**< CBOR tag, digest. */
+  const uint32 TAG_ASSOCIATED_DATA          = 13;     /**< CBOR tag, aad. */
+  const uint32 TAG_MAC                      = 14;     /**< CBOR tag, authentication tag. */
+  const uint32 TAG_CONTEXT                  = 15;     /**< CBOR tag, context. */
+  const uint32 TAG_SALT                     = 16;     /**< CBOR tag, salt. */
+
+  /* Supported CEK types/algorithms. */
+  const uint32 CEK_TYPE_AES                 = 0;      /**< AES key. */
+
+  /* Supported AES modes. */
+  const uint32 BLOCK_MODE_GCM               = 32;     /**< GCM mode. */
+
+  /* Supported AES key sizes. */
+  const uint32 AES128_KEY_SIZE              = 128;    /**< Key size 128. */
+  const uint32 AES192_KEY_SIZE              = 192;    /**< Key size 192. */
+  const uint32 AES256_KEY_SIZE              = 256;    /**< Key size 256. */
+
+  /* Key format of the key to be exported */
+  const uint32 KEY_FORMAT_SPKI              = 0;
+  const uint32 KEY_FORMAT_PKCS8             = 1;
+  const uint32 KEY_FORMAT_RAW               = 3;
+  const uint32 KEY_FORMAT_CBOR              = 4;
+
+  /* Labels to encode Key Parameters to CBOR */
+  const uint32 Label_PublicKey_Algorithm    = 1;      /**< CBOR label, PublicKey Algorithm. */
+  const uint32 Label_PublicKey_Content      = 2;      /**< CBOR label, PublicKey Content. */
+  const uint32 Label_RSA_Modulus            = 21;     /**< CBOR label, RSA Modulus. */
+  const uint32 Label_RSA_PublicExponent     = 22;     /**< CBOR label, RSA Exponent. */
+  const uint32 Label_RSAES_OAEP_Params      = 3;      /**< CBOR label, RSA-AES OAEP Params. */
+  const uint32 Label_Hash_Algorithm         = 31;     /**< CBOR label, Hash Algorithm. */
+  const uint32 Label_MGF_Hash_Algorithm     = 32;     /**< CBOR label, MFG Hash Algorithm. */
+  const uint32 Label_Caller_Params          = 6;      /**< CBOR label, Caller Parameters. */
+  const uint32 Label_Caller_Data            = 7;      /**< CBOR label, Caller Data. */
+
+  /* Values to encode Key Parameters to CBOR */
+  const uint32 Value_Algorithm_RSAES_OAEP   = 1;      /**< CBOR Value, Algorithm RSAES_OAEP. */
+  const uint32 Value_Digest_SHA1            = 1;      /**< CBOR Value, Digest SHA1. */
+  const uint32 Value_Digest_SHA224          = 2;      /**< CBOR Value, Digest SHA224. */
+  const uint32 Value_Digest_SHA256          = 3;      /**< CBOR Value, Digest SHA256. */
+  const uint32 Value_Digest_SHA384          = 4;      /**< CBOR Value, Digest SHA384. */
+  const uint32 Value_Digest_SHA512          = 5;      /**< CBOR Value, Digest SHA512. */
+
+  /**
+    Generates a key pair based on input algorithm and key parameters.
+
+    @param[in]  keyType      Either RSA or ECC.
+    @param[in]  keyParams    CBOR encoded parameters such as keyType, purpose, keysize, padding, etc.
+    @param[out] keyBlob      Buffer containing key material which is bound to caller and device.
+
+    @return
+    Object_OK on success.
+  */
+  method generateKey(in uint32 keyType, in buffer keyParams, out buffer keyBlob);
+
+  /**
+    Generates an attestation report for provisioning purpose.
+
+    @param[in]  licenseCert    Buffer containing license to use attestation feature.
+    @param[in]  keyBlob        Buffer containing key material.
+    @param[in]  serviceCtx     Bytes that make sense to the 3rd party cloud and is passed along by the QWES cloud back to the 3rd party cloud.
+    @param[out] builder        \link IAttestationBuilder \endlink object to add user data.
+
+    @return
+    Object_OK on success.
+  */
+  method generateAttestation(in buffer licenseCert, in buffer keyBlob, in buffer serviceCtx, out IAttestationBuilder builder);
+
+  /**
+    Derives a CEK using the keyBlob (Device's key) and cloudPublicKey (Cloud's key).
+
+    @param[in]  cekType           cek algorithm type.
+    @param[in]  keyBlob           Buffer containing the input key material (Device's key).
+    @param[in]  inParams          CBOR encoded parameters such as AES mode & key size.
+    @param[in]  cloudPublicKey    Buffer containing the cloud key material (Cloud's key).
+    @param[out] outParams         Reserved for future use.
+    @param[out] cekBlob           Output buffer containing derived cek.
+
+    @return
+    Object_OK on success.
+  */
+  method deriveCEK(in uint32 cekType, in buffer keyBlob, in buffer inParams, in buffer cloudPublicKey, out buffer outParams, out buffer cekBlob);
+
+  /**
+    Signs the given input using the key identified by keyBlob.
+
+    @param[in]  keyBlob      Buffer containing the key material.
+    @param[in]  tbs          To be signed data.
+    @param[out] signature    Signature data.
+
+    @return
+    Object_OK on success.
+  */
+  method signAsym(in buffer keyBlob, in buffer tbs, out buffer signature);
+
+  /**
+    Creates a cipher operation for encryption or decryption only.
+
+    @param[in]  keyBlob            Buffer containing the key material.
+    @param[in]  inParams           Reserved for future use.
+    @param[out] outParams          Reserved for future use.
+    @param[out] cipherOperation    \link ICipherOperation \endlink object to encrypt or decrypt data.
+
+    @return
+    Object_OK on success.
+  */
+  method beginCipher(in buffer keyBlob, in buffer inParams, out buffer outParams, out ICipherOperation cipherOperation);
+
+  /**
+    Imports an existing key for IProvisioning use
+
+    @param[in]  keyType      Type of key to import.
+    @param[in]  keyParams    CBOR-encoded parameters such as key purpose, key size, block mode, etc.
+    @param[in]  keyData      Buffer containing the bytes of the key to import.
+    @param[out] keyBlob      Buffer containing key material which is bound to caller and device.
+
+    @return
+    Object_OK on success.
+  */
+  method importKey(in uint32 keyType, in buffer keyParams, in buffer keyData, out buffer keyBlob);
+
+  /**
+    Exports public key
+
+    @param[in]  keyBlob      Buffer that contains the key material.
+    @param[in]  keyFormat    The key format in which the public key should be exported.
+    @param[out] keyData      Buffer containing the bytes of the exported public key.
+
+    @return
+    Object_OK on success.
+  */
+  method exportKey(in buffer keyBlob, in int32 keyFormat, out buffer keyData);
+
+  /**
+    Verifies the given signature using the key identified by keyBlob.
+
+    @param[in] keyBlob      Buffer containing the key material.
+    @param[in] tbs          Signed data.
+    @param[in] signature    Signature to verify.
+
+    @return
+    Object_OK on success.
+  */
+  method verifySignature(in buffer keyBlob, in buffer tbs, in buffer signature);
+
+  /**
+    Creates a key list and returns a handle to it to add or clear key blobs.
+
+    @param[out] keyList    \link IProvKeyList \endlink object to add the keys into the key list.
+
+    @return
+    Object_OK on success.
+  */
+  method createKeyList(out IProvKeyList keyList);
+
+  /**
+    Generates a report attesting to multiple keys for provisioning purpose.
+
+    @param[in]  licenseCert    Buffer containing license to use attestation feature.
+    @param[in]  keyList        \link IProvKeyList \endlink object that contains the keys to be attested to.
+    @param[out] builder        \link IAttestationBuilder \endlink object to add user data.
+
+    @return
+    Object_OK on success.
+  */
+  method generateAttestationWithKeyList(in buffer licenseCert, in IProvKeyList keyList, out IAttestationBuilder builder);
+
+  /** @} */ /* end_addtogroup IProvisioning */
+};
