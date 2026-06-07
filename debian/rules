@@ -9,7 +9,9 @@ override_dh_auto_configure:
 	-DSYSTEMD_UNIT_DIR=/usr/lib/systemd/system \
 	-DUDEV_DIR=/etc/udev/rules.d \
 	-DBUILD_PKCS11=OFF \
-	-DBUILD_RPMB_LISTENER=OFF
+	-DBUILD_RPMB_LISTENER=OFF \
+	-DDISTRO_USER=securemsm \
+	-DDISTRO_GROUP=securemsm
 
 override_dh_installsystemd:
 	dh_installsystemd --name=qteesupplicant

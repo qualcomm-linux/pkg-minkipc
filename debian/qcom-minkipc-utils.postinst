@@ -1,0 +1,12 @@
+set -e
+
+if [ "$1" = "configure" ]; then
+    if ! getent group securemsm > /dev/null 2>&1; then
+        groupadd securemsm
+    fi
+    if ! getent passwd securemsm > /dev/null 2>&1; then
+        useradd -s /usr/sbin/nologin -g securemsm securemsm
+    fi
+fi
+
+#DEBHELPER#
