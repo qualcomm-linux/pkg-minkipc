@@ -1,0 +1,4 @@
+usr/include/*
+usr/lib/*/libminkadaptor.so
+usr/lib/*/libminkteec.so
+usr/lib/aarch64-linux-gnu/pkgconfig/*
