@@ -1,4 +1,4 @@
-qcom-minkipc (1.2.6-1) UNRELEASED; urgency=medium
+minkipc (1.2.6-1) UNRELEASED; urgency=medium
 
   [ Abhinaba Rakshit ]
   * WIP — update changelog before next release
@@ -7,34 +7,3 @@ qcom-minkipc (1.2.6-1) UNRELEASED; urgency=medium
   * New upstream release
 
  -- GitHub Service Bot <githubservice@qti.qualcomm.com>  Wed, 03 Jun 2026 07:12:15 +0000
-
-qcom-minkipc (1.1.1-4) resolute; urgency=medium
-
-  [ Abhinaba Rakshit ]
-  * Initial commit
-
- -- GitHub Service Bot <githubservice@qti.qualcomm.com>  Mon, 25 May 2026 10:03:25 +0000
-
-qcom-minkipc (1.1.1-3) unstable; urgency=medium
-
-  [ Abhinaba Rakshit ]
-  * Initial commit
-
- -- GitHub Service Bot <githubservice@qti.qualcomm.com>  Fri, 08 May 2026 21:34:50 +0000
-
-qcom-minkipc (1.1.1-2) unstable; urgency=medium
-
-  [ Abhinaba Rakshit ]
-  * Initial commit
-
- -- GitHub Service Bot <githubservice@qti.qualcomm.com>  Fri, 08 May 2026 08:28:46 +0000
-
-qcom-minkipc (1.1.1-1) unstable; urgency=low
-
-  [ Abhinaba Rakshit ]
-  * Initial release.
-
-  [ GitHub Service Bot ]
-  * New upstream release
-
- -- GitHub Service Bot <githubservice@qti.qualcomm.com>  Fri, 08 May 2026 06:59:05 +0000

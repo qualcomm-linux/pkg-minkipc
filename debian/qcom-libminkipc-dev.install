@@ -1,3 +1,0 @@
-usr/include/*
-usr/lib/*/lib*.so
-usr/lib/aarch64-linux-gnu/pkgconfig/*
