@@ -1,4 +1,4 @@
-minkipc (1.2.6-1) UNRELEASED; urgency=medium
+minkipc (1.2.6-1) resolute; urgency=medium
 
   [ Abhinaba Rakshit ]
   * Update source package nema to minkipc
@@ -6,4 +6,4 @@ minkipc (1.2.6-1) UNRELEASED; urgency=medium
   * --no-start the systemd services
   * New upstream release 1.2.6
 
- -- Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com> Wed, 03 Jun 2026 07:12:15 +0000
+ -- GitHub Service Bot <githubservice@qti.qualcomm.com>  Mon, 08 Jun 2026 11:26:21 +0000
