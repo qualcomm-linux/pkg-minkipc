@@ -1,15 +1,13 @@
-minkipc (1.2.6-2~) UNRELEASED; urgency=medium
-
-  * WIP — update changelog before next release
-
- -- Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>  Mon, 08 Jun 2026 11:27:21 +0000
-
-minkipc (1.2.6-1) resolute; urgency=medium
+minkipc (1.2.6-1) UNRELEASED; urgency=medium
 
   [ Abhinaba Rakshit ]
-  * Update source package nema to minkipc
-  * Update the binary package structure
-  * --no-start the systemd services
-  * New upstream release 1.2.6
+  * Initial Debian release with upstream v1.2.6
+  * Package libminkadaptor0: Implements userspace MinkIPC interface
+  * Package libminkteec1: GlobalPlatform TEE Client API over MinkIPC
+  * Package minkipc-qteesupplicant: TEE supplicant daemon using MinkIPC
+  * Sample test clients are current not packaged
+  * RPMB listener is disabled from qteesupplicant due to failures
+  * PKCS11 libraries/clients and corresponding TAs are currently
+    not packaged.
 
- -- GitHub Service Bot <githubservice@qti.qualcomm.com>  Mon, 08 Jun 2026 11:26:21 +0000
+ -- Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>  Wed, 03 Jun 2026 07:12:15 +0000
