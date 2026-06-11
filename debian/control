@@ -55,6 +55,6 @@ Description: QTEE supplicant - support daemons and udev rules
  mechanisms such as SMC, sockets, or TEE IOCTLs.
  .
  This package consists of the qteesupplicant and sfsconfig systemd services along with
- its necessary shared library library internal to qteesupplicant. It includes udev rules
- as well for qteesupplicant to access QTEE.
+ its necessary shared library internal to qteesupplicant. It includes udev rules as well
+ for qteesupplicant to access QTEE.
 Depends: ${misc:Depends}, ${shlibs:Depends}
