@@ -1,4 +1,4 @@
-minkipc (1.2.6-1) UNRELEASED; urgency=medium
+minkipc (1.2.6-1) resolute; urgency=medium
 
   [ Abhinaba Rakshit ]
   * Initial Debian release with upstream v1.2.6
@@ -10,4 +10,4 @@ minkipc (1.2.6-1) UNRELEASED; urgency=medium
   * PKCS11 libraries/clients and corresponding TAs are currently
     not packaged.
 
- -- Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>  Wed, 03 Jun 2026 07:12:15 +0000
+ -- GitHub Service Bot <githubservice@qti.qualcomm.com>  Thu, 11 Jun 2026 08:59:01 +0000
