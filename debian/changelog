@@ -1,9 +1,13 @@
 minkipc (1.2.6-1) UNRELEASED; urgency=medium
 
   [ Abhinaba Rakshit ]
-  * WIP — update changelog before next release
-
-  [ GitHub Service Bot ]
-  * New upstream release
+  * Initial Debian release with upstream v1.2.6
+  * Package libminkadaptor0: Implements userspace MinkIPC interface
+  * Package libminkteec1: GlobalPlatform TEE Client API over MinkIPC
+  * Package minkipc-qteesupplicant: TEE supplicant daemon using MinkIPC
+  * Sample test clients are currently not packaged
+  * RPMB listener is disabled from qteesupplicant due to failures
+  * PKCS11 libraries/clients and corresponding TAs are currently
+    not packaged.
 
  -- GitHub Service Bot <githubservice@qti.qualcomm.com>  Wed, 03 Jun 2026 07:12:15 +0000
