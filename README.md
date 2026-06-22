@@ -14,9 +14,9 @@ Upstream project is hosted here : https://github.com/qualcomm/minkipc
 
 ## Installation Instructions
 ```
-sudo dpkg -i qcom-libminkipc_x.deb
-sudo dpkg -i qcom-minkipc-utils_x.deb
-sudo dpkg -i qcom-minkipc_x.deb
+sudo dpkg -i libminkadaptor0_x_arm64.deb
+sudo dpkg -i libminkteec1_x_arm64.deb
+sudo dpkg -i minkipc-qteesupplicant_x_arm64.deb
 ```
 ## Usage
 
