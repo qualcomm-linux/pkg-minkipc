@@ -1,4 +1,4 @@
-minkipc (1.2.6-1) UNRELEASED; urgency=medium
+minkipc (1.2.6-0qli+staging1~bpo1) UNRELEASED; urgency=medium
 
   [ Abhinaba Rakshit ]
   * Initial Debian release with upstream v1.2.6
