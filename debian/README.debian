@@ -1,0 +1,10 @@
+
+  [ Abhinaba Rakshit ]
+
+  * Package libminkadaptor0: Implements userspace MinkIPC interface
+  * Package libminkteec1: GlobalPlatform TEE Client API over MinkIPC
+  * Package minkipc-qteesupplicant: TEE supplicant daemon using MinkIPC
+  * Sample test clients are currently not packaged
+  * RPMB listener is disabled from qteesupplicant due to failures
+  * PKCS11 libraries/clients and corresponding TAs are currently
+    not packaged.

@@ -1,13 +1,12 @@
-minkipc (1.2.6-0qli+staging1~bpo1) UNRELEASED; urgency=medium
+minkipc (1.2.6-0qli+staging1~bpo13+1~) UNRELEASED; urgency=medium
 
-  [ Abhinaba Rakshit ]
-  * Initial Debian release with upstream v1.2.6
-  * Package libminkadaptor0: Implements userspace MinkIPC interface
-  * Package libminkteec1: GlobalPlatform TEE Client API over MinkIPC
-  * Package minkipc-qteesupplicant: TEE supplicant daemon using MinkIPC
-  * Sample test clients are currently not packaged
-  * RPMB listener is disabled from qteesupplicant due to failures
-  * PKCS11 libraries/clients and corresponding TAs are currently
-    not packaged.
+  * Rebuild for trixie.
 
- -- GitHub Service Bot <githubservice@qti.qualcomm.com>  Wed, 03 Jun 2026 07:12:15 +0000
+ -- Agathe Porte <agathe.porte@oss.qualcomm.com>  Fri, 03 Jul 2026 11:18:38 +0200
+
+minkipc (1.2.6-0qli+staging1) forky; urgency=medium
+
+  [ Agathe Porte ]
+  * Initial upload
+
+ -- root <root@f8a3e5c1d622>  Fri, 03 Jul 2026 09:12:12 +0000

@@ -6,7 +6,7 @@ Priority: optional
 Rules-Requires-Root: no
 Build-Depends: debhelper-compat (= 13), cmake, libcbor-dev, libqcomtee-dev, mink-idl-compiler
 Homepage: https://github.com/qualcomm/minkipc
-Vcs-Git: https://github.com/qualcomm-linux/pkg-minkipc -b qcom/debian/trixie
+Vcs-Git: https://github.com/qualcomm-linux/pkg-minkipc -b qcom/debian/latest
 Vcs-Browser: https://github.com/qualcomm-linux/pkg-minkipc
 
 Package: libminkadaptor0
