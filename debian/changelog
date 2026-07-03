@@ -1,5 +1,6 @@
-minkipc (1.2.6-0qli+staging1~) UNRELEASED; urgency=medium
+minkipc (1.2.6-0qli+staging1) forky; urgency=medium
 
+  [ Agathe Porte ]
   * Initial upload
 
- -- Agathe Porte <agathe.porte@oss.qualcomm.com>  Fri, 03 Jul 2026 10:15:36 +0200
+ -- root <root@f8a3e5c1d622>  Fri, 03 Jul 2026 09:12:12 +0000
