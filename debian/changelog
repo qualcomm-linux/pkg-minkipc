@@ -1,8 +1,9 @@
-minkipc (1.2.6-0qli+staging1~bpo13+1~) UNRELEASED; urgency=medium
+minkipc (1.2.6-0qli+staging1~bpo13+1) trixie; urgency=medium
 
+  [ Agathe Porte ]
   * Rebuild for trixie.
 
- -- Agathe Porte <agathe.porte@oss.qualcomm.com>  Fri, 03 Jul 2026 11:18:38 +0200
+ -- root <root@f9d714ec4acc>  Fri, 03 Jul 2026 09:20:38 +0000
 
 minkipc (1.2.6-0qli+staging1) forky; urgency=medium
 
