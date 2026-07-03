@@ -1,6 +1,5 @@
-minkipc (1.2.6-0qli+staging1) UNRELEASED; urgency=medium
+minkipc (1.2.6-0qli+staging1~) UNRELEASED; urgency=medium
 
-  [ Abhinaba Rakshit ]
-  * Initial Debian release with upstream v1.2.6
+  * Initial upload
 
- -- GitHub Service Bot <githubservice@qti.qualcomm.com>  Wed, 03 Jun 2026 07:12:15 +0000
+ -- Agathe Porte <agathe.porte@oss.qualcomm.com>  Fri, 03 Jul 2026 10:15:36 +0200
