@@ -78,7 +78,7 @@ static void deinit_listener_svc(size_t i)
  *
  * Stops all listener services waiting for a listener request from QTEE.
  */
-static void stop_listeners_services(void)
+void stop_listeners_services(void)
 {
 	size_t idx = 0;
 	size_t n_listeners = sizeof(listeners)/sizeof(struct listener_svc);
@@ -91,12 +91,6 @@ static void stop_listeners_services(void)
 			deinit_listener_svc(idx);
 
 			listeners[idx].is_registered = false;
-		}
-
-		/* Close lib_handle for all listeners */
-		if(listeners[idx].lib_handle != NULL) {
-			dlclose(listeners[idx].lib_handle);
-			listeners[idx].lib_handle = NULL;
 		}
 	}
 }
@@ -130,7 +124,7 @@ static int init_listener_svc(size_t i)
 
 	ret = (*init_func)();
 	if (ret < 0) {
-		MSGE("Init for %s failed: %d", listeners[i].service_name, ret);
+		MSGE("Init for %s failed: %d\n", listeners[i].service_name, ret);
 		return -1;
 	}
 
@@ -142,6 +136,7 @@ static int init_listener_svc(size_t i)
 int start_listener_services(void)
 {
 	int ret = 0;
+	int listener_count = 0;
 	size_t idx = 0;
 	size_t n_listeners = sizeof(listeners)/sizeof(struct listener_svc);
 
@@ -152,14 +147,10 @@ int start_listener_services(void)
 		ret = init_listener_svc(idx);
 		if (ret) {
 			MSGE("init_listener_svc failed: 0x%x\n", ret);
-			goto fail;
+			continue;
 		}
+		listener_count++;
 	}
 
-	return ret;
-
-fail:
-	stop_listeners_services();
-	return ret;
-
+	return listener_count;
 }

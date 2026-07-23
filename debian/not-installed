@@ -2,3 +2,4 @@ usr/lib/*/libtimeservice.so
 usr/lib/*/libtaautoload.so
 usr/lib/*/libfsservice.so
 usr/lib/*/libgpfsservice.so
+usr/lib/*/librpmbservice.so
