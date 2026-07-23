@@ -58,3 +58,29 @@ Description: QTEE supplicant - support daemons and udev rules
  its necessary shared library internal to qteesupplicant. It includes udev rules as well
  for qteesupplicant to access QTEE.
 Depends: ${misc:Depends}, ${shlibs:Depends}
+
+Package: minkipc-tools
+Architecture: arm64
+Section: utils
+Description: QTEE MinkIPC userspace tools
+ MinkIPC is Qualcomm’s lightweight capability-based inter-process communication (IPC) framework.
+ It enables secure, synchronous message passing across different security domains—like Linux
+ user space to Trusted Execution Environment—using unforgeable object references and transport
+ mechanisms such as SMC, sockets, or TEE IOCTLs.
+ .
+ This package consists of tools such as rpmb_client.
+Depends: ${misc:Depends}, ${shlibs:Depends}
+
+Package: minkipc-tests
+Architecture: arm64
+Section: devel
+Description: QTEE MinkIPC test binaries
+ MinkIPC is Qualcomm’s lightweight capability-based inter-process communication (IPC) framework.
+ It enables secure, synchronous message passing across different security domains—like Linux
+ user space to Trusted Execution Environment—using unforgeable object references and transport
+ mechanisms such as SMC, sockets, or TEE IOCTLs.
+ .
+ This package provides test binaries for validating MinkIPC functionality,
+ including smcinvoke_client for SMC invocation testing and gp_test_client
+ for GlobalPlatform TEE API conformance testing.
+Depends: ${misc:Depends}, ${shlibs:Depends}
