@@ -1,10 +1,50 @@
+minkipc for Debian
+==================
 
-  [ Abhinaba Rakshit ]
+MinkIPC is Qualcomm's lightweight capability-based inter-process
+communication (IPC) framework built on the MINK ('Mink is Not a Kernel')
+security paradigm.  It enables secure, synchronous message passing across
+different security domains — such as Linux user space to the Qualcomm
+Trusted Execution Environment (QTEE) — using unforgeable object references
+and transport mechanisms including SMC calls, sockets, and TEE IOCTLs.
 
-  * Package libminkadaptor0: Implements userspace MinkIPC interface
-  * Package libminkteec1: GlobalPlatform TEE Client API over MinkIPC
-  * Package minkipc-qteesupplicant: TEE supplicant daemon using MinkIPC
-  * Sample test clients are currently not packaged
-  * RPMB listener is disabled from qteesupplicant due to failures
-  * PKCS11 libraries/clients and corresponding TAs are currently
-    not packaged.
+Packages
+--------
+
+libminkadaptor0
+  Shared library that implements the userspace MinkIPC interface.  It
+  provides the low-level Object_invoke transport layer used to communicate
+  with QTEE via the QCOM-TEE driver registered with the Linux TEE subsystem.
+
+libminkteec1
+  Shared library that implements the GlobalPlatform TEE Client API (GP TEE
+  Client API v1.0) on top of MinkIPC. Applications that use the standard
+  GP TEEC interface can use this library to communicate with Trusted
+  Applications running in QTEE.
+
+libminkipc-dev
+  Development headers and linker symlinks for libminkadaptor0 and
+  libminkteec1. Required when building software that links against either
+  of those libraries.
+
+minkipc-qteesupplicant
+  The qteesupplicant and sfsconfig daemons, their systemd service units,
+  and the udev rules needed for user-space access to QTEE.  The supplicant
+  handles requests from the TEE that require Linux-side resources (e.g.
+  file-system access, RPMB storage).
+
+minkipc-tools
+  Userspace utilities for interacting with MinkIPC services.  Currently
+  includes rpmb_client for provisioning the Replay Protected Memory Block.
+
+minkipc-tests
+  Test binaries for validating MinkIPC functionality, including
+  smcinvoke_client (SMC invocation testing) and gp_test_client
+  (GlobalPlatform TEE API conformance testing). Intended for development
+  and integration verification; not required on production systems.
+
+Known Limitations
+-----------------
+
+PKCS#11 libraries, client utilities, and the corresponding Trusted
+Applications (TAs) are not packaged as part of this source package. 
