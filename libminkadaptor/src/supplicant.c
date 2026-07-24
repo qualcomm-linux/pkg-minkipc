@@ -17,9 +17,9 @@
 static __thread uint32_t sig_pending = 0;
 
 /* Defined in syscall.S */
-extern int recv_ioctl(int, int, void *, uint32_t *);
-extern int recv(void);
-extern int recv_skip(void);
+extern int mink_recv_ioctl(int, int, void *, uint32_t *);
+extern int mink_recv_svc(void);
+extern int mink_recv_skip(void);
 
 static inline uintptr_t get_pc_from_ucontext(ucontext_t *ucontext) {
 #if defined(__arm__) || defined(__aarch32__)  // ARM32
@@ -55,7 +55,7 @@ static inline void set_pc_in_ucontext(ucontext_t *ucontext, uintptr_t new_pc) {
  * when it checks this variable.
  * If the thread has already checked `sig_pending` but hasn't yet
  * entered the blocking `TEE_IOC_SUPPL_RECV` ioctl, it updates the
- * program counter (PC) to skip the ioctl. In this case, the `recv_ioctl()`
+ * program counter (PC) to skip the ioctl. In this case, the `mink_recv_ioctl()`
  * function returns `-EINTR`, allowing the thread to terminate
  * synchronously and safely.
  */
@@ -65,13 +65,13 @@ static void supplicant_kill_handler(int sig, siginfo_t *info, void *context)
 
 	ucontext_t *ucontext = (ucontext_t *)context;
 	uintptr_t pc_current = get_pc_from_ucontext(ucontext);
-	uintptr_t addr_recv_ioctl = (uintptr_t)recv_ioctl;
-	uintptr_t addr_recv = (uintptr_t)recv;
+	uintptr_t addr_recv_ioctl = (uintptr_t)mink_recv_ioctl;
+	uintptr_t addr_recv = (uintptr_t)mink_recv_svc;
 
 	if (sig == SIGUSR1) {
 		/* Are we just about to enter the syscall? Skip! */
 		if (addr_recv_ioctl <= pc_current && pc_current <= addr_recv)
-			set_pc_in_ucontext(ucontext, (uintptr_t)recv_skip);
+			set_pc_in_ucontext(ucontext, (uintptr_t)mink_recv_skip);
 		else
 			sig_pending = 1;
 	}
@@ -83,13 +83,13 @@ static void supplicant_kill_handler(int sig, siginfo_t *info, void *context)
  * This function implements a generic interface for invoking
  * `TEE_IOC_SUPPL_RECV` and `TEE_IOC_SUPPL_SEND` ioctls. Since
  * `TEE_IOC_SUPPL_RECV` is a blocking call, it is implemented separately via
- * the `recv_ioctl()` function defined in syscall.S.
+ * the `mink_recv_ioctl()` function defined in syscall.S.
  *
  * The primary reason for this separation is to ensure the safe and synchronous
  * termination of supplicant threads by exiting the supplicant_worker()
  * function.
  *
- * The `recv_ioctl` implementation checks the TLS `sig_pending` variable before
+ * The `mink_recv_ioctl` implementation checks the TLS `sig_pending` variable before
  * entering the kernel. If a kill signal is pending, the function skips
  * entering the kernel and terminates the thread by returning `-EINTR`.
  * If the signal arrives after the TLS `sig_pending` variable check, the
@@ -131,7 +131,7 @@ static int tee_call(int fd, int op, ...)
 		/* It's safe to kill the thread here, UNBLOCK
 		 * the kill signal */
 		pthread_sigmask(SIG_UNBLOCK, &mask, NULL);
-		ret = recv_ioctl(fd, op, arg, &sig_pending);
+		ret = mink_recv_ioctl(fd, op, arg, &sig_pending);
 		pthread_sigmask(SIG_BLOCK, &mask, NULL);
 
 		set_errno(ret);

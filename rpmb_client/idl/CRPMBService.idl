@@ -1,0 +1,12 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause
+
+/**
+ * @addtogroup CRPMBService
+ * @{
+ *   Class CRPMBService implements \link IRPMBService \endlink interface.
+ */
+
+const uint32 CRPMBService_UID = 274;
+
+/** @} */

@@ -6,6 +6,10 @@ BindsTo=dev-tee0.device
 After=dev-tee0.device sfsconfig.service
 
 [Service]
+User=@DISTRO_USER@
+Group=@DISTRO_GROUP@
+AmbientCapabilities=CAP_SYS_RAWIO
+CapabilityBoundingSet=CAP_SYS_RAWIO
 Type=exec
 ExecStart=@CMAKE_INSTALL_PREFIX@/bin/qtee_supplicant
 Restart=always

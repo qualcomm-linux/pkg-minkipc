@@ -13,7 +13,7 @@ int main() {
 
 	MSGD("qtee_supplicant: process entry PPID = %d\n", getppid());
 
-	if(0 != start_listener_services()) {
+	if(0 >= start_listener_services()) {
 		MSGE("ERROR: listeners registration failed\n");
 		return -1;
 	}
@@ -21,5 +21,6 @@ int main() {
 	MSGE("QTEE_SUPPLICANT RUNNING\n");
 	pause();
 	MSGD("qtee_supplicant: Process exiting!!!\n");
+	stop_listeners_services();
 	return -1;
 }
