@@ -8,10 +8,10 @@ override_dh_auto_configure:
 	-DMINKIDLC_BIN_DIR=/usr/lib/$(DEB_HOST_MULTIARCH)/mink/bin \
 	-DSYSTEMD_UNIT_DIR=/usr/lib/systemd/system \
 	-DUDEV_DIR=/usr/lib/udev/rules.d \
-	-DBUILD_PKCS11=OFF \
-	-DBUILD_RPMB_LISTENER=OFF \
+	-DBUILD_UNITTEST=TRUE \
 	-DDISTRO_USER=securemsm \
-	-DDISTRO_GROUP=securemsm
+	-DDISTRO_GROUP=securemsm \
+	-DBUILD_PKCS11=OFF
 
 override_dh_installsystemd:
 	dh_installsystemd --name=qteesupplicant --no-start

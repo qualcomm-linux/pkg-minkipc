@@ -34,5 +34,6 @@ struct listener_svc {
  * Starts listener services which wait for a listener request from QTEE.
  */
 int start_listener_services(void);
+void stop_listeners_services(void);
 
 #endif // __LISTENER_MNGR_H

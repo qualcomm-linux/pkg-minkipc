@@ -1,199 +1,175 @@
-# RPMB Service for MINK IPC Framework
+# librpmbservice — RPMB Listener for MinkIPC
 
 ## Overview
 
-The RPMB (Replay Protected Memory Block) service provides secure storage capabilities through the MINK IPC framework. RPMB is a hardware-based secure storage feature available in eMMC and UFS storage devices that provides authenticated and replay-protected data storage.
+`librpmbservice` is a shared-library listener that bridges QTEE (Qualcomm
+Trusted Execution Environment) applications to the hardware RPMB (Replay
+Protected Memory Block) partition on eMMC and UFS storage devices.
 
-## Features
-
-### Core RPMB Operations
-- **Key Programming**: One-time programming of authentication key
-- **Write Counter**: Monotonic counter to prevent replay attacks
-- **Authenticated Data Write**: Secure data storage with HMAC authentication
-- **Authenticated Data Read**: Secure data retrieval with integrity verification
-- **Device Information**: Query RPMB device capabilities
-- **Key Verification**: Verify programmed authentication key
-
-### Security Features
-- **HMAC-SHA256 Authentication**: All operations use HMAC-SHA256 for authentication
-- **Replay Protection**: Monotonic write counter prevents replay attacks
-- **Hardware Security**: Leverages eMMC/UFS RPMB hardware security features
-- **One-time Key Programming**: Authentication key can only be programmed once
-- **Secure Communication**: All operations go through QTEE trusted execution environment
+It registers with the QTEE supplicant as a CBO listener under service ID
+`0x2000`.  When a QTEE application issues an RPMB command via MinkIPC, the
+supplicant dispatches it to this library, which performs the corresponding
+authenticated ioctl sequence against the kernel RPMB device node and returns
+the result frame to the secure world.
 
 ## Architecture
 
-The RPMB service follows the standard MINK IPC listener pattern:
-
 ```
 QTEE Application
-       ↓
-   MINK IPC
-       ↓
-QTEE Supplicant
-       ↓
-RPMB Listener (librpmbservice.so.1)
-       ↓
-MMC/UFS RPMB Hardware
+      │  MinkIPC (SMCInvoke)
+      ▼
+QTEE Supplicant (qtee_supplicant)
+      │  CBO listener dispatch
+      ▼
+librpmbservice.so          ← this library
+  ├── rpmb_service.c       MinkIPC registration + command dispatch
+  ├── rpmb.c               Device detection, driver table, read/write API
+  ├── rpmb_emmc.c          eMMC RPMB ioctl implementation
+  └── rpmb_ufs.c           UFS RPMB BSG implementation
+      │
+      ▼
+Kernel RPMB device node
+  /dev/mmcblk0rpmb  (eMMC)
+  /dev/bsg/ufs-bsg  (UFS)
 ```
 
-### Service Registration
-- **Service ID**: 0xd
-- **Buffer Size**: 20KB
-- **Library**: librpmbservice.so.1
-- **Dispatch Function**: smci_dispatch
+### Device detection
 
-## Message Protocol
+At service startup `rpmb_init()` walks a static driver table in priority
+order (UFS first, eMMC second).  Each driver's `probe()` function checks
+whether its device node is present.  The first driver that succeeds has its
+`init()` called; its ops pointer is stored as the single active device for
+the lifetime of the service.
 
-### Command Types
+If no device is found the service continues running but returns an error
+status to the secure world on every read/write request — it does not crash
+or fall back to a wrong device type.
+
+Adding support for a new storage type requires only a new row in
+`rpmb_driver_table[]` in `rpmb.c`; no other file needs to change.
+
+### eMMC driver (`rpmb_emmc.c`)
+
+Device parameters are read from sysfs at init time rather than hardcoded:
+
+| sysfs attribute | Purpose |
+|---|---|
+| `/sys/block/mmcblk0/device/raw_rpmb_size_mult` | RPMB partition size |
+| `/sys/block/mmcblk0/device/rel_sectors` | Reliable-write frame count |
+| `/sys/block/mmcblk0/device/enhanced_rpmb_supported` | eMMC 5.1 enhanced RPMB |
+
+The ioctl sequences follow the JEDEC eMMC 4.5 specification and the
+Qualcomm reference implementation:
+
+- **Read** — 2-command `MMC_IOC_MULTI_CMD`: `CMD25` (send request frame) +
+  `CMD18` (read response frames).
+- **Write** — 3-command `MMC_IOC_MULTI_CMD` per MAC batch: `CMD25` with
+  `SECURE_WRITE` flag (data frames) + `CMD25` (result-read request) +
+  `CMD18` (result frame).  The result frame is checked after each
+  transaction; the loop stops on any non-zero result code.
+
+### UFS driver (`rpmb_ufs.c`)
+
+Uses the UFS BSG interface (`/dev/bsg/ufs-bsg` or `/dev/bsg/ufs-bsg0`) with
+SCSI Security Protocol Out/In commands.
+
+## Source files
+
+| File | Role |
+|---|---|
+| `rpmb_service.c` | MinkIPC lifecycle (`init`/`deinit`) and `smci_dispatch` |
+| `rpmb.c` | Driver table, `rpmb_init/read/write`, wakelock |
+| `rpmb_emmc.c` | eMMC probe / init / read / write / exit |
+| `rpmb_ufs.c` | UFS probe / init / read / write / exit |
+| `rpmb_logging.c` | Syslog-based logging with optional console output |
+| `rpmb.h` | Public API: `rpmb_dev_ops_t`, `rpmb_frame`, `rpmb_init_info_t` |
+| `rpmb_private.h` | Internal: `struct rpmb_stats`, driver function prototypes |
+| `rpmb_logging.h` | `RPMB_LOG_{ERROR,WARN,INFO,DEBUG}` macros |
+| `rpmb_ufs.h` | UFS BSG constants and structures |
+
+## MinkIPC command protocol
+
+The service handles four command IDs dispatched by the secure world:
+
+| Command ID | Value | Description |
+|---|---|---|
+| `TZ_CM_CMD_RPMB_INIT` | `0x101` | Device init — returns size and `rel_wr_count` |
+| `TZ_CM_CMD_RPMB_READ` | `0x102` | Authenticated read |
+| `TZ_CM_CMD_RPMB_WRITE` | `0x103` | Authenticated write |
+| `TZ_CM_CMD_RPMB_PARTITION` | `0x104` | Partition table query |
+
+All commands share a single 20 KB shared-memory buffer
+(`TZ_MAX_BUF_LEN = 20040` bytes).  The request and response are packed
+into the same buffer; the response header (`tz_rpmb_rw_res_t`) is written
+at offset 0 and the RPMB frame payload follows immediately after.
+
+### Key wire structures
+
 ```c
-typedef enum {
-    TZ_RPMB_MSG_CMD_RPMB_PROGRAM_KEY,      // Program authentication key
-    TZ_RPMB_MSG_CMD_RPMB_GET_WRITE_COUNTER, // Get write counter
-    TZ_RPMB_MSG_CMD_RPMB_WRITE_DATA,       // Write authenticated data
-    TZ_RPMB_MSG_CMD_RPMB_READ_DATA,        // Read authenticated data
-    TZ_RPMB_MSG_CMD_RPMB_GET_DEVICE_INFO,  // Get device information
-    TZ_RPMB_MSG_CMD_RPMB_VERIFY_KEY,       // Verify authentication key
-    TZ_RPMB_MSG_CMD_RPMB_END,              // End service
-} tz_rpmb_msg_cmd_type;
+/* Init response — tells TZ the device size and MAC batch size */
+typedef struct {
+    uint32_t cmd_id;
+    uint32_t version;
+    int32_t  status;
+    uint32_t num_sectors;    /* RPMB partition size in 512-byte sectors */
+    uint32_t rel_wr_count;   /* Frames per authenticated write operation */
+} tz_sd_device_init_res_t;
+
+/* Read / write request */
+typedef struct {
+    uint32_t cmd_id;
+    uint32_t num_sectors;       /* Total frames to transfer */
+    uint32_t req_buff_len;      /* Length of RPMB frame data */
+    uint32_t req_buff_offset;   /* Offset of RPMB frames within buffer */
+    uint32_t version;
+    uint32_t rel_wr_count;      /* MAC batch size (write only) */
+} tz_rpmb_rw_req_t;
 ```
 
-### Data Structures
-- **RPMB Frame**: Standard 512-byte RPMB frame structure
-- **Device Info**: RPMB device capabilities and configuration
-- **Request/Response**: Command-specific request and response structures
+`rel_wr_count` in the write request is the number of frames over which the
+secure world computed a single HMAC.  The eMMC driver sends exactly that
+many frames per `MMC_IOC_MULTI_CMD` call so the write counter increments
+only once per batch.
 
-## Usage Example
+## Build
 
-### QTEE Application Usage
-```c
-// Program RPMB key (one-time operation)
-tz_rpmb_program_key_req_t key_req;
-key_req.cmd_id = TZ_RPMB_MSG_CMD_RPMB_PROGRAM_KEY;
-strncpy(key_req.device_path, "/dev/mmcblk0rpmb", sizeof(key_req.device_path)-1);
-memcpy(key_req.key, authentication_key, RPMB_KEY_SIZE);
-// Send via MINK IPC to RPMB service
-
-// Write secure data
-tz_rpmb_write_data_req_t write_req;
-write_req.cmd_id = TZ_RPMB_MSG_CMD_RPMB_WRITE_DATA;
-strncpy(write_req.device_path, "/dev/mmcblk0rpmb", sizeof(write_req.device_path)-1);
-write_req.address = 0;
-write_req.block_count = 1;
-memcpy(write_req.data, secure_data, RPMB_DATA_SIZE);
-memcpy(write_req.key, authentication_key, RPMB_KEY_SIZE);
-// Send via MINK IPC to RPMB service
-
-// Read secure data
-tz_rpmb_read_data_req_t read_req;
-read_req.cmd_id = TZ_RPMB_MSG_CMD_RPMB_READ_DATA;
-strncpy(read_req.device_path, "/dev/mmcblk0rpmb", sizeof(read_req.device_path)-1);
-read_req.address = 0;
-read_req.block_count = 1;
-generate_nonce(read_req.nonce);
-// Send via MINK IPC to RPMB service
-```
-
-## Build Instructions
-
-### Prerequisites
-- OpenSSL development libraries
-- CMake 3.10 or higher
-- Linux kernel headers (for MMC IOCTL definitions)
-
-### Building
 ```bash
-# Configure with RPMB listener enabled
-cmake .. -DBUILD_RPMB_LISTENER=ON
-
-# Build the service
+cd <workspace>/minkipc_code
+mkdir -p build && cd build
+cmake .. -DCMAKE_TOOLCHAIN_FILE=../CMakeToolchain.txt
 make rpmbservice
-
 ```
 
-### Installation
-```bash
-# Install service library
-make install
+To enable console logging during development (prints to stderr in addition
+to syslog), uncomment in `CMakeLists.txt`:
 
-# The service will be installed as:
-# - /usr/local/lib/librpmbservice.so.1
-# - /usr/local/include/rpmb_msg.h
+```cmake
+add_definitions(-DRPMB_DEBUG_CONSOLE_OUTPUT)
 ```
 
-## Security Considerations
+The installed artefact is `librpmbservice.so.1.0.0` with the symlinks
+`librpmbservice.so.1` and `librpmbservice.so`.
 
-### Key Management
-- **One-time Programming**: RPMB key can only be programmed once
-- **Secure Key Storage**: Keys should be stored securely in QTEE
-- **Key Derivation**: Consider using key derivation functions for application-specific keys
+## Runtime requirements
 
-### Replay Protection
-- **Monotonic Counter**: Write counter prevents replay attacks
-- **Nonce Usage**: Use random nonces for read operations
-- **MAC Verification**: Always verify HMAC for data integrity
+| Resource | Path | Notes |
+|---|---|---|
+| eMMC RPMB device | `/dev/mmcblk0rpmb` | char device (kernel ≥ 4.19) |
+| eMMC RPMB device (legacy) | `/dev/block/mmcblk0rpmb` | block device (kernel < 4.19) |
+| UFS BSG device | `/dev/bsg/ufs-bsg` or `/dev/bsg/ufs-bsg0` | |
+| Wakelock | `/sys/power/wake_lock` | optional; non-fatal if absent |
+| eMMC sysfs | `/sys/block/mmcblk0/device/` | `raw_rpmb_size_mult`, `rel_sectors` |
 
-### Access Control
-- **Device Permissions**: Ensure proper permissions on RPMB device nodes
-- **QTEE Integration**: All operations should go through QTEE for security
-- **Application Isolation**: Different applications should use different key derivations
+## Logging
 
-## Hardware Requirements
-
-### Supported Devices
-- **eMMC**: eMMC devices with RPMB support
-- **UFS**: UFS devices with RPMB support
-- **Device Nodes**: Typically `/dev/mmcblk0rpmb` or `/dev/block/mmcblk0rpmb`
-
-### RPMB Specifications
-- **Data Size**: 256 bytes per block
-- **Authentication**: HMAC-SHA256
-- **Counter**: 32-bit monotonic write counter
-- **Address Space**: Device-dependent (typically 128KB - 16MB)
-
-## Integration with QTEE
-
-### Service Registration
-The RPMB service automatically registers with the QTEE supplicant when enabled:
-- Compile with `-DBUILD_RPMB_LISTENER=ON`
-- Service starts automatically with qtee_supplicant
-- Available to QTEE applications via MINK IPC
-
-### Error Handling
-- **RPMB Result Codes**: Standard RPMB result codes for operation status
-- **Return Values**: Service-level return codes for IPC status
-- **Error Logging**: Comprehensive error logging for debugging
-
-## Future Enhancements
-
-### Planned Features
-- **Multi-block Operations**: Support for reading/writing multiple blocks
-- **Secure Write/Read**: Enhanced secure operations with additional validation
-- **Key Derivation**: Built-in key derivation functions
-- **Access Control**: Fine-grained access control for different applications
-
-### Performance Optimizations
-- **Batch Operations**: Support for batching multiple RPMB operations
-- **Caching**: Intelligent caching of device information
-- **Async Operations**: Asynchronous operation support
-
-## Troubleshooting
-
-### Common Issues
-1. **Device Access**: Ensure RPMB device node has proper permissions
-2. **Key Programming**: Remember that key programming is one-time only
-3. **Authentication Failures**: Verify key consistency across operations
-4. **Counter Mismatches**: Ensure write counter synchronization
-
-### Debug Information
-- Enable debug logging with `MSGD` macros
-- Check RPMB result codes in responses
-- Verify device capabilities with device info command
-- Monitor MMC/UFS driver logs for hardware issues
+Logs are written to syslog under the tag `[RPMB]`.  The log level can be
+controlled at runtime via the `RPMB_LOG_LEVEL` environment variable
+(integer, `3`=ERROR … `7`=DEBUG).  Set `RPMB_LOG_CONSOLE=1` to mirror
+output to stderr without rebuilding.
 
 ## References
 
-- [JEDEC eMMC Specification](https://www.jedec.org/standards-documents/docs/jesd84-b51)
-- [JEDEC UFS Specification](https://www.jedec.org/standards-documents/docs/jesd220)
-- [Linux MMC Subsystem Documentation](https://www.kernel.org/doc/html/latest/driver-api/mmc/index.html)
-- [MINK IPC Framework Documentation](../../../docs/)
+- JEDEC eMMC 4.5 / 5.1 specification (JESD84-B45 / JESD84-B51)
+- JEDEC UFS 2.0 specification (JESD220)
+- Linux kernel `Documentation/driver-api/mmc/`
+- Qualcomm reference: `securemsm/tzservices/rpmb/`

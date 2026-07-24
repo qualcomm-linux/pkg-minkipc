@@ -20,6 +20,8 @@ option(USE_GLIB "Use GLIB functions" FALSE)
 option(CFG_USE_PKGCONFIG "Use pkg-config for discovering install target directory for systemd and udev files." OFF)
 # Build RPMB listener
 option(BUILD_RPMB_LISTENER "Build RPMB Listener" TRUE)
+# Build RPMB Client
+option(BUILD_RPMB_CLIENT "Build RPMB Client" TRUE)
 
 # Build PKCS-11
 option(BUILD_PKCS11 "Build PKCS#11" TRUE)
@@ -30,6 +32,8 @@ set(MINKIDLC_BIN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/idlc" CACHE PATH "Directory co
 set(SYSTEMD_UNIT_DIR "" CACHE PATH "Directory containing the systemd unit path")
 set(UDEV_DIR "" CACHE PATH "Directory containing the UDEV path")
 set(PERSIST_MOUNT_UNIT "" CACHE PATH "Name of the systemd unit responsible for mounting the persist partition")
+set(DISTRO_USER "root" CACHE STRING "Distro specific user for systemd service and devices")
+set(DISTRO_GROUP "root" CACHE STRING "Distro specific group for the systemd service devices")
 
 if ("${MINKIDLC_BIN_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}/idlc")
 	file(DOWNLOAD
@@ -77,3 +81,6 @@ if (BUILD_PKCS11)
 	endif()
 endif()
 
+if(BUILD_RPMB_CLIENT)
+	add_subdirectory(rpmb_client)
+endif()

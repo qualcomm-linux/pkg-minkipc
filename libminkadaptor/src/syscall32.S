@@ -1,20 +1,20 @@
 // Copyright (c) 2025, Qualcomm Innovation Center, Inc. All rights reserved.
 // SPDX-License-Identifier: BSD-3-Clause
 
-      .global    recv_ioctl
-      .global    recv_skip
-      .global    recv
+      .global    mink_recv_ioctl
+      .global    mink_recv_skip
+      .global    mink_recv_svc
       .p2align   4
 
-recv_ioctl:
+mink_recv_ioctl:
       ldr     r4, [r3]
       cmp     r4, #0
-      bne     recv_skip
+      bne     mink_recv_skip
       mov     r7, #29
-recv:
+mink_recv_svc:
       svc     #0
       bx      lr
-recv_skip:
+mink_recv_skip:
       mov     r0, #-4
       bx      lr
 
