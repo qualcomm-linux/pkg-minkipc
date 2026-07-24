@@ -48,4 +48,3 @@ Known Limitations
 
 PKCS#11 libraries, client utilities, and the corresponding Trusted
 Applications (TAs) are not packaged as part of this source package. 
-They must be built and installed manually from the upstream source tree if required.
