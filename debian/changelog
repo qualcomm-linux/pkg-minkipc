@@ -1,7 +1,6 @@
-minkipc (1.2.9-1~) UNRELEASED; urgency=medium
+minkipc (1.2.9-1) UNRELEASED; urgency=medium
 
   [ Abhinaba Rakshit ]
-  * WIP — update changelog before next release
   * New upstream release v1.2.9
   * Drop d/p/add-user-group and d/p/make-dev-tee0-conditional
   * Enable RPMB listener
