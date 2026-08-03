@@ -1,4 +1,4 @@
-minkipc (1.2.9-0qli+staging1~bpo13+1) trixie; urgency=medium
+minkipc (1.2.9-0qli+staging1~bpo13+1) UNRELEASED; urgency=medium
 
   [ Abhinaba Rakshit ]
   * Rebuild for trixie.
