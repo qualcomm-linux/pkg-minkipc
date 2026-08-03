@@ -1,0 +1,49 @@
+// Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: BSD-3-Clause
+
+/**
+ * @addtogroup IRPMBService
+ * @{
+ */
+
+/** @cond */
+interface IRPMBService {
+/** @endcond */
+
+  error ERROR_RPMB_MAC;
+  error ERROR_RPMB_WRITE_COUNTER;
+  error ERROR_RPMB_ADDR;
+  error ERROR_RPMB_WRITE;
+  error ERROR_RPMB_READ;
+  error ERROR_RPMB_NOT_PROVISIONED;
+  error ERROR_RPMB_MAC_GENERATION;
+  error ERROR_RPMB_RNG_GENERATION;
+  error ERROR_RPMB_NONCE;
+  error ERROR_RPMB_PROVISIONED;
+
+  /**
+   * Provision RPMB key.
+   *
+   * @param[in] keyType  Type of RPMB key to provision:
+   *                     0 = production key, 1 = test key.
+   *
+   * @return Object_OK if successful.
+   */
+  method rpmbProvisionKey(in int32 keyType);
+
+  /**
+   * Erase RPMB partition by overwriting with zeroes.
+   *
+   * @return Object_OK if successful.
+   */
+  method rpmbErase();
+
+  /**
+   * Check RPMB key provisioning status.
+   *
+   * @return Object_OK if provisioned and key matches.
+   */
+  method rpmbCheckProv();
+
+  /* @} */
+};

@@ -1,17 +1,15 @@
 // Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
-// SPDX-License-Identifier: BSD-3-Clause
+// SPDX-License-Identifier: BSD-3-Clause-Clear
 
 #ifndef __RPMB_UFS_H__
 #define __RPMB_UFS_H__
 
 #include <linux/bsg.h>
+#include <scsi/sg.h>
 #include <scsi/scsi_bsg_ufs.h>
 #include <endian.h>
 #include <dirent.h>
 #include <string.h>
-
-/* Unified system definitions */
-#define AID_SYSTEM 1000
 
 #ifndef __u32
 #define __u32 uint32_t
@@ -27,7 +25,6 @@
 #define SCSI_SEC_PROT		0xEC
 #define SCSI_SEC_UFS_PROT_ID	0x0001
 #define SENSE_BUF_LEN		96
-#define RPMB_FRAME_SIZE		512
 #define SCSI_TIMEOUT		30000
 
 #define FNAME_SZ 64
@@ -35,16 +32,8 @@
 
 #define UPIU_RPMB_LUN	0xC4
 
-#define SG_IO	0x2285
-
 #define DWORD(b3, b2, b1, b0) htobe32((b3 << 24) | (b2 << 16) |\
 					 (b1 << 8) | b0)
-
-/* UFS BSG device nodes - unified paths */
-char ufs_bsg_dev[FNAME_SZ] = "/dev/bsg/ufs-bsg0";
-
-/* RPMB BSG device node - unified path */
-char rpmb_bsg_dev[] = "/dev/bsg/0:0:0:49476";
 
 /* UPIU Transaction Codes */
 enum {
@@ -88,12 +77,5 @@ enum bsg_ioctl_dir {
 	BSG_IOCTL_DIR_TO_DEV,
 	BSG_IOCTL_DIR_FROM_DEV,
 };
-
-/* Function prototypes */
-int ufs_bsg_dev_open(void);
-void ufs_bsg_dev_close(void);
-int rpmb_bsg_dev_open(void);
-void rpmb_bsg_dev_close(void);
-int rpmb_ufs_send_request_sense(void);
 
 #endif /* __RPMB_UFS_H__ */

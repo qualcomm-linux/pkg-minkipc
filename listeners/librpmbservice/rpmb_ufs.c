@@ -1,19 +1,27 @@
 // Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
-// SPDX-License-Identifier: BSD-3-Clause
+// SPDX-License-Identifier: BSD-3-Clause-Clear
 
 #define LOG_TAG "rpmb_ufs"
 
-#include "rpmb.h"
-#include "rpmb_ufs.h"
-#include "rpmb_core.h"
-#include "rpmb_logging.h"
-
 #include <errno.h>
+#include <fcntl.h>
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <sys/ioctl.h>
 #include <unistd.h>
 
-/* Utility macros */
-#define UNUSED(x) ((void)(x))
+#include "rpmb.h"
+#include "rpmb_logging.h"
+#include "rpmb_private.h"
+#include "rpmb_ufs.h"
+
+/* UFS BSG device node path -- populated by get_ufs_bsg_dev() at init */
+static char ufs_bsg_dev[FNAME_SZ] = "/dev/bsg/ufs-bsg0";
+
+/* RPMB BSG device node path -- populated by get_rpmb_bsg_dev() at init */
+static char rpmb_bsg_dev[FNAME_SZ] = "/dev/bsg/0:0:0:49476";
 
 static int get_ufs_bsg_dev(void)
 {
@@ -65,49 +73,88 @@ static int get_ufs_bsg_dev(void)
 	return ret;
 }
 
-int ufs_bsg_dev_open(void)
+/*
+ * get_rpmb_bsg_dev - scan /dev/bsg for the UFS RPMB well-known LUN node.
+ *
+ * The kernel names the BSG node H:C:T:L where L is the decimal LUN.
+ * UPIU_RPMB_LUN (0xC4) is exposed as decimal 49476 in the BSG path.
+ * We scan for any entry ending in ":49476" rather than hardcoding the
+ * host/channel/target numbers, which vary by platform.
+ */
+static int get_rpmb_bsg_dev(void)
 {
-	if (!rpmb.fd_ufs_bsg) {
+	DIR *dir;
+	struct dirent *ent;
+	size_t len;
+	int ret = -ENODEV;
+
+	dir = opendir("/dev/bsg");
+	if (!dir) {
+		RPMB_LOG_ERROR("could not open /dev/bsg (error no: %d)\n",
+			       errno);
+		return -EINVAL;
+	}
+
+	while ((ent = readdir(dir)) != NULL) {
+		len = strlen(ent->d_name);
+		/* Match any H:C:T:49476 entry */
+		if (len > 6 && strcmp(ent->d_name + len - 6, ":49476") == 0) {
+			/* d_name is NAME_MAX (255); cap to what fits in rpmb_bsg_dev */
+			snprintf(rpmb_bsg_dev, sizeof(rpmb_bsg_dev),
+				 "/dev/bsg/%.54s", ent->d_name);
+			RPMB_LOG_INFO("Found RPMB BSG device: %s\n",
+				      rpmb_bsg_dev);
+			ret = 0;
+			break;
+		}
+	}
+	closedir(dir);
+
+	if (ret)
+		RPMB_LOG_ERROR("could not find RPMB BSG device\n");
+
+	return ret;
+}
+
+static int ufs_bsg_dev_open(void)
+{
+	if (rpmb.fd_ufs_bsg < 0) {
 		rpmb.fd_ufs_bsg = open(ufs_bsg_dev, O_RDWR);
 		if (rpmb.fd_ufs_bsg < 0) {
 			RPMB_LOG_ERROR("Unable to open %s (error no: %d)\n",
-			     ufs_bsg_dev, errno);
-			rpmb.fd_ufs_bsg = 0;
-			return errno;
+				       ufs_bsg_dev, errno);
+			return -errno;
 		}
 	}
-
 	return 0;
 }
 
-void ufs_bsg_dev_close(void)
+static void ufs_bsg_dev_close(void)
 {
-	if (rpmb.fd_ufs_bsg) {
+	if (rpmb.fd_ufs_bsg >= 0) {
 		close(rpmb.fd_ufs_bsg);
-		rpmb.fd_ufs_bsg = 0;
+		rpmb.fd_ufs_bsg = -1;
 	}
 }
 
-int rpmb_bsg_dev_open(void)
+static int rpmb_bsg_dev_open(void)
 {
-	if (!rpmb.fd) {
+	if (rpmb.fd < 0) {
 		rpmb.fd = open(rpmb_bsg_dev, O_RDWR | O_SYNC);
 		if (rpmb.fd < 0) {
 			RPMB_LOG_ERROR("Unable to open %s (error no: %d)\n",
-			     rpmb_bsg_dev, errno);
-			rpmb.fd = 0;
-			return errno;
+				       rpmb_bsg_dev, errno);
+			return -errno;
 		}
 	}
-
 	return 0;
 }
 
-void rpmb_bsg_dev_close(void)
+static void rpmb_bsg_dev_close(void)
 {
-	if (rpmb.fd) {
+	if (rpmb.fd >= 0) {
 		close(rpmb.fd);
-		rpmb.fd = 0;
+		rpmb.fd = -1;
 	}
 }
 
@@ -155,15 +202,15 @@ static void compose_ufs_bsg_query_req(struct ufs_bsg_request *req, __u8 func,
 	struct utp_upiu_header *hdr = &req->upiu_req.header;
 	struct utp_upiu_query *qr = &req->upiu_req.qr;
 
-        req->msgcode = UTP_UPIU_QUERY_REQ;
-        hdr->dword_0 = DWORD(UTP_UPIU_QUERY_REQ, 0, 0, 0);
-        hdr->dword_1 = DWORD(0, func, 0, 0);
-        hdr->dword_2 = DWORD(0, 0, length >> 8, (__u8)length);
-        qr->opcode = opcode;
-        qr->idn = idn;
-        qr->index = index;
-        qr->selector = sel;
-        qr->length = htobe16(length);
+	req->msgcode = UTP_UPIU_QUERY_REQ;
+	hdr->dword_0 = DWORD(UTP_UPIU_QUERY_REQ, 0, 0, 0);
+	hdr->dword_1 = DWORD(0, func, 0, 0);
+	hdr->dword_2 = DWORD(0, 0, length >> 8, (__u8)length);
+	qr->opcode = opcode;
+	qr->idn = idn;
+	qr->index = index;
+	qr->selector = sel;
+	qr->length = htobe16(length);
 }
 
 static int ufs_query_desc(int fd, __u8 *buf,
@@ -202,7 +249,7 @@ static int32_t get_ufs_rpmb_parameters(void)
 	__u8 unit_data[QUERY_DESC_SIZE_UNIT] = {0};
 	uint16_t wspecversion = 0;
 	uint32_t rpmb_num_blocks = 0;
-	int32_t ret;
+	int ret;
 
 	ret = ufs_bsg_dev_open();
 	if (ret)
@@ -316,12 +363,12 @@ static int scsi_bsg_ioctl(int fd, __u8 *cdb, __u8 cdb_len, void *buf,
 	return ret;
 }
 
-int rpmb_ufs_send_request_sense(void)
+static int rpmb_ufs_send_request_sense(void)
 {
 	unsigned char cdb[SCSI_REQ_SENSE_CDB_LEN] = {0};
 	unsigned char sense_buf[SCSI_REQ_SENSE_BUF_LEN] = {0};
 	enum bsg_ioctl_dir dir = BSG_IOCTL_DIR_FROM_DEV;
-	int32_t ret = 0;
+	int ret = 0;
 
 	cdb[0] = SCSI_REQ_SENSE_ID;
 	cdb[4] = SCSI_REQ_SENSE_BUF_LEN;
@@ -339,14 +386,54 @@ int rpmb_ufs_send_request_sense(void)
 	return ret;
 }
 
-int rpmb_ufs_init(rpmb_init_info_t *rpmb_info)
+/*
+ * rpmb_ufs_probe - check whether a UFS BSG device is present
+ *
+ * Read-only check: scans /dev/bsg for a ufs-bsg entry without
+ * modifying any global state.  get_ufs_bsg_dev() is called later
+ * by rpmb_ufs_init() to populate ufs_bsg_dev[] for actual I/O.
+ */
+device_id_type rpmb_ufs_probe(void)
 {
-	int32_t ret = 0;
+	const char * const names[] = { "ufs-bsg", "ufs-bsg0", NULL };
+	const char * const dirs[] = { "/dev/bsg", "/dev", NULL };
+	DIR *dir;
+	struct dirent *ent;
+	int i, j;
+
+	for (i = 0; dirs[i]; i++) {
+		dir = opendir(dirs[i]);
+		if (!dir)
+			continue;
+		while ((ent = readdir(dir)) != NULL) {
+			for (j = 0; names[j]; j++) {
+				if (strcmp(ent->d_name, names[j]) == 0) {
+					closedir(dir);
+					return UFS_RPMB;
+				}
+			}
+		}
+		closedir(dir);
+	}
+	return NO_DEVICE;
+}
+
+int rpmb_ufs_init(void)
+{
+	int ret;
+
+	rpmb.fd = -1;
+	rpmb.fd_ufs_bsg = -1;
 
 	ret = get_ufs_bsg_dev();
 	if (ret)
 		return ret;
 	RPMB_LOG_DEBUG("Found the ufs bsg dev: %s\n", ufs_bsg_dev);
+
+	ret = get_rpmb_bsg_dev();
+	if (ret)
+		return ret;
+	RPMB_LOG_DEBUG("Found the rpmb bsg dev: %s\n", rpmb_bsg_dev);
 
 	ret = get_ufs_rpmb_parameters();
 	if (ret < 0) {
@@ -358,9 +445,6 @@ int rpmb_ufs_init(rpmb_init_info_t *rpmb_info)
 
 	rpmb.info.dev_type = UFS_RPMB;
 	rpmb.init_done = 1;
-	rpmb_info->dev_type = rpmb.info.dev_type;
-	rpmb_info->size = rpmb.info.size;
-	rpmb_info->rel_wr_count = rpmb.info.rel_wr_count;
 
 	ret = rpmb_ufs_send_request_sense();
 	if (ret < 0) {
@@ -376,7 +460,7 @@ int rpmb_ufs_read(uint32_t *req_buf, uint32_t blk_cnt, uint32_t *resp_buf,
 		uint32_t *resp_len)
 {
 	uint32_t num_bytes, temp_blk_cnt = blk_cnt, blk_cnt_rem = blk_cnt;
-	int32_t ret = 0, num_rpmb_trans, i;
+	int ret = 0, num_rpmb_trans, i;
 	unsigned char scsi_sec_out_cmd_cdb[SCSI_SEC_CDB_LEN];
 	unsigned char scsi_sec_in_cmd_cdb[SCSI_SEC_CDB_LEN];
 	uint32_t *req_buf_cached = NULL, *req_buf_offset = NULL;
@@ -418,7 +502,7 @@ int rpmb_ufs_read(uint32_t *req_buf, uint32_t blk_cnt, uint32_t *resp_buf,
 			RPMB_LOG_ERROR("Error: incorrect block count calculation in reading rpmb data from ufs\t");
 			RPMB_LOG_ERROR("blk_cnt_rem = %u, temp_blk_cnt = %u, i = %d\n", blk_cnt_rem, temp_blk_cnt, i);
 		}
-		num_bytes = temp_blk_cnt * RPMB_FRAME_SIZE;
+		num_bytes = temp_blk_cnt * RPMB_BLK_SIZE;
 
 		/* Send a SPO cmd for a read request */
 		memset(&scsi_sec_out_cmd_cdb, 0, SCSI_SEC_CDB_LEN);
@@ -428,13 +512,13 @@ int rpmb_ufs_read(uint32_t *req_buf, uint32_t blk_cnt, uint32_t *resp_buf,
 		scsi_sec_out_cmd_cdb[2] = (unsigned char)((SCSI_SEC_UFS_PROT_ID >> 8) & 0xff);
 		scsi_sec_out_cmd_cdb[3] = (unsigned char)(SCSI_SEC_UFS_PROT_ID & 0xff);
 
-		scsi_sec_out_cmd_cdb[6] = (unsigned char)((RPMB_FRAME_SIZE >> 24) & 0xff);
-		scsi_sec_out_cmd_cdb[7] = (unsigned char)((RPMB_FRAME_SIZE >> 16) & 0xff);
-		scsi_sec_out_cmd_cdb[8] = (unsigned char)((RPMB_FRAME_SIZE >> 8) & 0xff);
-		scsi_sec_out_cmd_cdb[9] = (unsigned char)(RPMB_FRAME_SIZE & 0xff);
+		scsi_sec_out_cmd_cdb[6] = (unsigned char)((RPMB_BLK_SIZE >> 24) & 0xff);
+		scsi_sec_out_cmd_cdb[7] = (unsigned char)((RPMB_BLK_SIZE >> 16) & 0xff);
+		scsi_sec_out_cmd_cdb[8] = (unsigned char)((RPMB_BLK_SIZE >> 8) & 0xff);
+		scsi_sec_out_cmd_cdb[9] = (unsigned char)(RPMB_BLK_SIZE & 0xff);
 
 		ret = scsi_bsg_ioctl(rpmb.fd, scsi_sec_out_cmd_cdb, SCSI_SEC_CDB_LEN,
-				     req_buf_offset, RPMB_FRAME_SIZE, BSG_IOCTL_DIR_TO_DEV);
+				     req_buf_offset, RPMB_BLK_SIZE, BSG_IOCTL_DIR_TO_DEV);
 		if (ret) {
 			RPMB_LOG_ERROR("%s: Error sending SPO through scsi_bsg_ioctl (return value: %d, error no: %d, iter: %d)\n", __func__, ret, errno, i);
 			goto out;
@@ -461,8 +545,8 @@ int rpmb_ufs_read(uint32_t *req_buf, uint32_t blk_cnt, uint32_t *resp_buf,
 		}
 
 		/* Select the next RPMB frame */
-		req_buf_offset = (uint32_t*) ((void*)((uint8_t*)req_buf_offset + RPMB_BLK_SIZE));
-		resp_buf = (uint32_t*) ((void*)((uint8_t*)resp_buf + (temp_blk_cnt * RPMB_BLK_SIZE)));
+		req_buf_offset = (uint32_t *)((void *)((uint8_t*)req_buf_offset + RPMB_BLK_SIZE));
+		resp_buf = (uint32_t *)((void *)((uint8_t*)resp_buf + (temp_blk_cnt * RPMB_BLK_SIZE)));
 		blk_cnt_rem -= temp_blk_cnt;
 	}
 
@@ -479,10 +563,10 @@ out_free:
 static int rpmb_ufs_write_with_timeout(uint32_t *req_buf, uint32_t blk_cnt, uint32_t *resp_buf,
 		uint32_t *resp_len, uint32_t frames_per_rpmb_trans)
 {
-        int i, num_rpmb_trans = 0;
-	uint32_t result_frame_bytes = RPMB_FRAME_SIZE;
-	uint32_t req_frame_bytes = RPMB_FRAME_SIZE * frames_per_rpmb_trans;
-	int32_t ret = 0;
+	int i, num_rpmb_trans = 0;
+	uint32_t result_frame_bytes = RPMB_BLK_SIZE;
+	uint32_t req_frame_bytes = RPMB_BLK_SIZE * frames_per_rpmb_trans;
+	int ret = 0;
 	unsigned char scsi_sec_out_cmd_cdb[SCSI_SEC_CDB_LEN];
 	unsigned char scsi_sec_in_cmd_cdb[SCSI_SEC_CDB_LEN];
 
@@ -545,7 +629,7 @@ static int rpmb_ufs_write_with_timeout(uint32_t *req_buf, uint32_t blk_cnt, uint
 		scsi_sec_out_cmd_cdb[9] = (unsigned char)(result_frame_bytes & 0xff);
 
 		ret = scsi_bsg_ioctl(rpmb.fd, scsi_sec_out_cmd_cdb, SCSI_SEC_CDB_LEN,
-				     &read_result_reg_frame, result_frame_bytes, BSG_IOCTL_DIR_TO_DEV);
+				     (void *)&read_result_reg_frame, result_frame_bytes, BSG_IOCTL_DIR_TO_DEV);
 		if (ret) {
 			RPMB_LOG_ERROR("%s: Error sending SPO through scsi_bsg_ioctl (return value: %d, error no: %d, iter: %d)\n", __func__, ret, errno, i);
 			goto out;
@@ -572,7 +656,7 @@ static int rpmb_ufs_write_with_timeout(uint32_t *req_buf, uint32_t blk_cnt, uint
 		}
 
 		/* Select the next RPMB frame */
-		req_buf = (uint32_t*) ((void*)((uint8_t*)req_buf + (frames_per_rpmb_trans * RPMB_BLK_SIZE)));
+		req_buf = (uint32_t *)((void *)((uint8_t*)req_buf + (frames_per_rpmb_trans * RPMB_BLK_SIZE)));
 	}
 
 out:
@@ -580,76 +664,23 @@ out:
 	*resp_len = RPMB_MIN_BLK_CNT * RPMB_BLK_SIZE;
 out_unlock:
 	rpmb_wakeunlock();
-        return ret;
+	return ret;
 }
 
-/* UFS RPMB write function - called directly by legacy rpmb.c */
 int rpmb_ufs_write(uint32_t *req_buf, uint32_t blk_cnt, uint32_t *resp_buf,
 		uint32_t *resp_len, uint32_t frames_per_rpmb_trans)
 {
-    RPMB_LOG_DEBUG("RPMB UFS write: blk_cnt=%d, frames_per_trans=%d", blk_cnt, frames_per_rpmb_trans);
+	int ret;
 
-    /* Call the actual write function directly */
-    int result = rpmb_ufs_write_with_timeout(req_buf, blk_cnt, resp_buf, resp_len, frames_per_rpmb_trans);
-
-    if (result == 0) {
-        RPMB_LOG_DEBUG("RPMB UFS write completed successfully");
-    } else {
-        RPMB_LOG_ERROR("RPMB UFS write failed with error: %d", result);
-    }
-
-    return result;
+	ret = rpmb_ufs_write_with_timeout(req_buf, blk_cnt, resp_buf,
+					  resp_len, frames_per_rpmb_trans);
+	if (ret)
+		RPMB_LOG_ERROR("UFS RPMB write failed: %d\n", ret);
+	return ret;
 }
 
-/* UFS cleanup function for legacy system */
 void rpmb_ufs_exit(void)
 {
-    /* UFS cleanup - close any open file descriptors */
-    ufs_bsg_dev_close();
-    rpmb_bsg_dev_close();
+	ufs_bsg_dev_close();
+	rpmb_bsg_dev_close();
 }
-
-/* Wrapper functions for rpmb_core.c compatibility (not used by main service) */
-static rpmb_result_t ufs_init_wrapper(rpmb_device_info_t *info)
-{
-    rpmb_init_info_t legacy_info = {0};
-    int result = rpmb_ufs_init(&legacy_info);
-
-    if (result == 0 && info) {
-        info->device_type = RPMB_DEVICE_UFS;
-        info->size_sectors = legacy_info.size;
-        info->reliable_write_count = legacy_info.rel_wr_count;
-        info->initialized = true;
-    }
-
-    return (result == 0) ? RPMB_RESULT_OK : RPMB_RESULT_GENERAL_FAILURE;
-}
-
-static void ufs_cleanup_wrapper(void)
-{
-    rpmb_ufs_exit();
-}
-
-static rpmb_result_t ufs_read_wrapper(uint32_t *request_buf, uint32_t block_count,
-                                     uint32_t *response_buf, uint32_t *response_len)
-{
-    int result = rpmb_ufs_read(request_buf, block_count, response_buf, response_len);
-    return (result == 0) ? RPMB_RESULT_OK : RPMB_RESULT_READ_FAILURE;
-}
-
-static rpmb_result_t ufs_write_wrapper(uint32_t *request_buf, uint32_t block_count,
-                                      uint32_t *response_buf, uint32_t *response_len,
-                                      uint32_t frames_per_operation)
-{
-    int result = rpmb_ufs_write(request_buf, block_count, response_buf,
-                               response_len, frames_per_operation);
-    return (result == 0) ? RPMB_RESULT_OK : RPMB_RESULT_WRITE_FAILURE;
-}
-
-/* Device operations structure for rpmb_core.c compatibility */
-const rpmb_device_ops_t rpmb_ufs_ops = {
-    .init = ufs_init_wrapper,
-    .cleanup = ufs_cleanup_wrapper,
-    .read = ufs_read_wrapper,
-    .write = ufs_write_wrapper,
-};

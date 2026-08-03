@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-# This script will be used for ARMOR tool 
+# This script will be used for ARMOR tool - 32-bit ARM compilation
 # ===== DOCKER CONFIGURATION =====
 USER_ID="${USER_ID:-}"
 GROUP_ID="${GROUP_ID:-}"
@@ -19,13 +19,13 @@ ECR_REPO="ssg"
 IMAGE_NAME="ssg-image"
 TAG="v1.1"
 
-# ===== Environment variables (equivalent to Docker ENV) =====
-export ARCH=arm64
-export CROSS_COMPILE=aarch64-linux-gnu-
+# ===== Environment variables for 32-bit ARM (armhf) =====
+export ARCH=arm
+export CROSS_COMPILE=arm-linux-gnueabihf-
 export CMAKE_SYSTEM_NAME=Linux
-export CMAKE_SYSTEM_PROCESSOR=aarch64
-export CMAKE_C_COMPILER=aarch64-linux-gnu-gcc
-export CMAKE_CXX_COMPILER=aarch64-linux-gnu-g++
+export CMAKE_SYSTEM_PROCESSOR=arm
+export CMAKE_C_COMPILER=arm-linux-gnueabihf-gcc
+export CMAKE_CXX_COMPILER=arm-linux-gnueabihf-g++
 
 
 # ===== Create user/group if all variables are provided =====
@@ -49,7 +49,7 @@ if [[ -n "$USER_ID" && -n "$GROUP_ID" && -n "$USER_NAME" ]]; then
 fi
 
 #---------------------------
-#Pulling docker image 
+# Pulling docker image 
 #---------------------------
 # ===== LOGIN TO ECR =====
 echo "Logging in to Amazon ECR..."
@@ -64,14 +64,13 @@ echo "Pulling Docker image: ${FULL_IMAGE}"
 docker pull "${FULL_IMAGE}"
 echo "Docker image pulled successfully."
 
-
 # Create local tag
 docker tag "${FULL_IMAGE}" "${IMAGE_NAME}:${TAG}"
 
 echo "Docker image pulled and tagged successfully."
 
-# ===== Configure APT sources (deb822 format) =====
-echo "Configuring APT sources for amd64 + arm64..."
+# ===== Configure APT sources (deb822 format) for amd64 + armhf =====
+echo "Configuring APT sources for amd64 + armhf (32-bit ARM)..."
  
 sudo tee /etc/apt/sources.list.d/base-amd64.sources >/dev/null <<EOF
 Types: deb
@@ -81,25 +80,26 @@ Components: main restricted universe multiverse
 Architectures: amd64
 EOF
  
-sudo tee /etc/apt/sources.list.d/ports-arm64.sources >/dev/null <<EOF
+sudo tee /etc/apt/sources.list.d/ports-armhf.sources >/dev/null <<EOF
 Types: deb
 URIs: http://ports.ubuntu.com/ubuntu-ports/
 Suites: noble noble-updates noble-security
 Components: main restricted universe multiverse
-Architectures: arm64
+Architectures: armhf
 EOF
  
 # ===== Update package lists =====
 sudo apt-get update
  
-# ===== Install packages =====
+# ===== Install packages for 32-bit ARM compilation =====
  
 sudo apt-get install -y \
     build-essential git clang lld flex bison bc \
     libssl-dev curl kmod systemd-ukify \
     debhelper-compat libdw-dev:amd64 libelf-dev:amd64 \
     rsync mtools dosfstools u-boot-tools b4 cpio \
-    gcc-aarch64-linux-gnu g++-aarch64-linux-gnu \
+    gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf \
+    gcc-arm-linux-gnueabi g++-arm-linux-gnueabi \
     python3-pip swig yamllint \
     python3-setuptools python3-wheel \
     yq abigail-tools sparse \
@@ -113,7 +113,6 @@ python3 -m pip install --break-system-packages \
     ply \
     GitPython
  
- 
 # ===== Cleanup =====
 sudo rm -rf /var/lib/apt/lists/*
 
@@ -122,59 +121,68 @@ ROOT_DIR="${GITHUB_WORKSPACE:-$(pwd)}"
 # --------------------
 # Repo locations
 # --------------------
-QCBOR_DIR="$ROOT_DIR/QCBOR"
-QCOMTEE_DIR="$ROOT_DIR/QCOMTEE"
+QCBOR_DIR_32="$ROOT_DIR/QCBOR"
+QCOMTEE_DIR_32="$ROOT_DIR/QCOMTEE"
 
 # --------------------
 # Clone or update repos
 # --------------------
-if [ ! -d "$QCBOR_DIR" ]; then
-  git clone --branch master https://github.com/laurencelundblade/QCBOR.git "$QCBOR_DIR"
+if [ ! -d "$QCBOR_DIR_32" ]; then
+  git clone --branch master https://github.com/laurencelundblade/QCBOR.git "$QCBOR_DIR_32"
 else
-  cd "$QCBOR_DIR"
+  cd "$QCBOR_DIR_32"
   git pull
 fi
 
-if [ ! -d "$QCOMTEE_DIR" ]; then
-  git clone --branch main https://github.com/quic/quic-teec.git "$QCOMTEE_DIR"
+if [ ! -d "$QCOMTEE_DIR_32" ]; then
+  git clone --branch main https://github.com/quic/quic-teec "$QCOMTEE_DIR_32"
+  cd $QCOMTEE_DIR_32
 else
-  cd "$QCOMTEE_DIR"
+  cd "$QCOMTEE_DIR_32"
   git pull
-fi
+ fi
 
 # --------------------
-# Build QCBOR
+# Build QCBOR (32-bit)
 # --------------------
-cd "$QCBOR_DIR"
+cd "$QCBOR_DIR_32"
 cat > CMakeToolchain.txt <<EOF
 set(CMAKE_SYSTEM_NAME Linux)
-set(CMAKE_SYSTEM_PROCESSOR aarch64)
-set(CMAKE_C_COMPILER aarch64-linux-gnu-gcc)
-set(CMAKE_CXX_COMPILER aarch64-linux-gnu-g++)
+set(CMAKE_SYSTEM_PROCESSOR arm)
+set(CMAKE_C_COMPILER arm-linux-gnueabihf-gcc)
+set(CMAKE_CXX_COMPILER arm-linux-gnueabihf-g++)
 EOF
 cat CMakeToolchain.txt
 cmake  -DBUILD_UNITTEST=ON -DCMAKE_TOOLCHAIN_FILE=CMakeToolchain.txt
 cmake --build .
-make install DESTDIR="$GITHUB_WORKSPACE/LIBQCBOR"
+make install DESTDIR="$GITHUB_WORKSPACE/LIBQCBOR_32"
 
-echo "QCBOR built ✅"
+echo "QCBOR (32-bit) built ✅"
 
 # --------------------
-# Build QCOMTEE (depends on QCBOR)
+# Build QCOMTEE (32-bit, depends on QCBOR)
 # --------------------
-cd "$QCOMTEE_DIR"
+cd "$QCOMTEE_DIR_32"
+cat > CMakeToolchain.txt <<EOF
+set(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_SYSTEM_PROCESSOR arm)
+set(CMAKE_C_COMPILER arm-linux-gnueabihf-gcc)
+set(CMAKE_CXX_COMPILER arm-linux-gnueabihf-g++)
+EOF
+cat CMakeToolchain.txt
+
 cmake -S . -B build \
     -DCMAKE_TOOLCHAIN_FILE=CMakeToolchain.txt \
-    -DBUILD_UNITTEST=ON \
-    -DQCBOR_DIR_HINT="$GITHUB_WORKSPACE/LIBQCBOR/usr/local"
+    -DBUILD_UNITTEST=ON\
+    -DQCBOR_DIR_HINT="$GITHUB_WORKSPACE/LIBQCBOR_32/usr/local"
 cmake --build build
 cd build
-make install DESTDIR="${GITHUB_WORKSPACE}/QUIC_TEEC"
+make install DESTDIR="${GITHUB_WORKSPACE}/QUIC_TEEC_32"
 cd ..
 
-echo "QCOMTEE built ✅"
+echo "QCOMTEE (32-bit) built ✅"
 
-#Pulling submodules 
+# Pulling submodules 
 pushd "$ROOT_DIR" >/dev/null
 if [[ -d .git && -f .gitmodules ]]; then
     git submodule sync --recursive
@@ -182,9 +190,16 @@ if [[ -d .git && -f .gitmodules ]]; then
 fi
 popd >/dev/null
 
+cat > CMakeToolchain.txt <<EOF
+set(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_SYSTEM_PROCESSOR arm)
+set(CMAKE_C_COMPILER arm-linux-gnueabihf-gcc)
+set(CMAKE_CXX_COMPILER arm-linux-gnueabihf-g++)
+EOF
+cat CMakeToolchain.txt
 # --------------------
-# Build MINKIPC (depends on both)
-#cd "$MINKIPC_DIR"
+# Build MINKIPC (32-bit, depends on both)
+# --------------------
 docker run -i --rm \
   --user "$(id -u):$(id -g)" \
   --workdir "$GITHUB_WORKSPACE" \
@@ -195,11 +210,10 @@ docker run -i --rm \
   cmake -S . -B build \
     -DBUILD_UNITTEST=ON \
     -DCMAKE_TOOLCHAIN_FILE=CMakeToolchain.txt \
-    -DQCBOR_DIR_HINT="$GITHUB_WORKSPACE/LIBQCBOR/usr/local" \
-    -DQCOMTEE_DIR_HINT="$GITHUB_WORKSPACE/QUIC_TEEC/usr/local"
+    -DQCBOR_DIR_HINT="$GITHUB_WORKSPACE/LIBQCBOR_32/usr/local" \
+    -DQCOMTEE_DIR_HINT="$GITHUB_WORKSPACE/QUIC_TEEC_32/usr/local"
   cd build
-  make install DESTDIR="${GITHUB_WORKSPACE}/MINKIPC_LIBS"
+  make install DESTDIR="${GITHUB_WORKSPACE}/MINKIPC_LIBS_32"
 '
 
-echo "MINKIPC built ✅"
-
+echo "MINKIPC (32-bit) built ✅"
