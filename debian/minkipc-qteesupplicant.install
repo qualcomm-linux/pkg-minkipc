@@ -3,6 +3,7 @@ usr/lib/*/libtimeservice.so.*
 usr/lib/*/libtaautoload.so.*
 usr/lib/*/libfsservice.so.*
 usr/lib/*/libgpfsservice.so.*
+usr/lib/*/librpmbservice.so.*
 usr/libexec/sfs_config
 usr/lib/udev/rules.d/99-qcomtee-udev.rules
 usr/lib/systemd/system/qteesupplicant.service
