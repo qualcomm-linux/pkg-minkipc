@@ -1,9 +1,9 @@
-minkipc (1.2.9-0qli+staging1~bpo13+1) UNRELEASED; urgency=medium
+minkipc (1.2.9-0qli+staging1~bpo13+1) trixie; urgency=medium
 
   [ Abhinaba Rakshit ]
   * Rebuild for trixie.
 
- -- Abhinaba Rakshit <arakshit@hu-arakshit-hyd.qualcomm.com>  Mon, 03 Aug 2026 15:30:29 +0530
+ -- Debusine Action GitHub Bot <noreply@bot.invalid>  Mon, 03 Aug 2026 10:16:00 +0000
 
 minkipc (1.2.9-0qli+staging1) forky; urgency=medium
 
