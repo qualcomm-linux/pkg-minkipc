@@ -1,6 +1,4 @@
-minkipc (1.2.9-2~) UNRELEASED; urgency=medium
-
-  * WIP — update changelog before next release
+minkipc (1.2.9-2) UNRELEASED; urgency=medium
 
   [ Alexis Cellier ]
   * debian: add lintian override to hide expected warning
