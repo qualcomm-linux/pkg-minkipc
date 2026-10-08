@@ -1,0 +1,142 @@
+Description: qtee_supplicant: Support a private plugin directory
+ qtee_supplicant loads its listener libraries with dlopen(), nothing
+ else links against them. Add a PLUGIN_DIR option to install them to,
+ and load them from, a private directory instead of the public library
+ directory. The default is unchanged.
+Author: Lukas Märdian <lukas.maerdian@oss.qualcomm.com>
+Origin: upstream, https://github.com/qualcomm/minkipc/pull/104
+Forwarded: https://github.com/qualcomm/minkipc/pull/104
+Last-Update: 2026-10-08
+---
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -32,6 +32,13 @@ set(MINKIDLC_BIN_DIR "${CMAKE_CURRENT_SO
+ set(SYSTEMD_UNIT_DIR "" CACHE PATH "Directory containing the systemd unit path")
+ set(UDEV_DIR "" CACHE PATH "Directory containing the UDEV path")
+ set(PERSIST_MOUNT_UNIT "" CACHE PATH "Name of the systemd unit responsible for mounting the persist partition")
++set(PLUGIN_DIR "" CACHE PATH "Absolute directory the listener plugin libraries are installed to and loaded from by qtee_supplicant (default: the library directory)")
++
++if (PLUGIN_DIR)
++	set(PLUGIN_INSTALL_DIR "${PLUGIN_DIR}")
++else()
++	set(PLUGIN_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}")
++endif()
+ set(DISTRO_USER "root" CACHE STRING "Distro specific user for systemd service and devices")
+ set(DISTRO_GROUP "root" CACHE STRING "Distro specific group for the systemd service devices")
+ 
+--- a/listeners/libfsservice/fs/CMakeLists.txt
++++ b/listeners/libfsservice/fs/CMakeLists.txt
+@@ -60,5 +60,5 @@ set_target_properties(fsservice PROPERTI
+ # ''Install targets''.
+ 
+ install(TARGETS fsservice
+-	LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
++	LIBRARY DESTINATION "${PLUGIN_INSTALL_DIR}"
+ )
+--- a/listeners/libfsservice/gpfs/CMakeLists.txt
++++ b/listeners/libfsservice/gpfs/CMakeLists.txt
+@@ -60,5 +60,5 @@ set_target_properties(gpfsservice PROPER
+ # ''Install targets''.
+ 
+ install(TARGETS gpfsservice
+-	LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
++	LIBRARY DESTINATION "${PLUGIN_INSTALL_DIR}"
+ )
+--- a/listeners/librpmbservice/CMakeLists.txt
++++ b/listeners/librpmbservice/CMakeLists.txt
+@@ -40,5 +40,5 @@ target_link_libraries(rpmbservice
+ )
+ 
+ install(TARGETS rpmbservice
+-	LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
++	LIBRARY DESTINATION "${PLUGIN_INSTALL_DIR}"
+ )
+--- a/listeners/libtaautoload/CMakeLists.txt
++++ b/listeners/libtaautoload/CMakeLists.txt
+@@ -76,5 +76,5 @@ target_link_libraries(taautoload
+ # ''Install targets''.
+ 
+ install(TARGETS taautoload
+-	LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
++	LIBRARY DESTINATION "${PLUGIN_INSTALL_DIR}"
+ )
+--- a/listeners/libtimeservice/CMakeLists.txt
++++ b/listeners/libtimeservice/CMakeLists.txt
+@@ -49,5 +49,5 @@ target_link_libraries(timeservice
+ # ''Install targets''.
+ 
+ install(TARGETS timeservice
+-	LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
++	LIBRARY DESTINATION "${PLUGIN_INSTALL_DIR}"
+ )
+--- a/qtee_supplicant/CMakeLists.txt
++++ b/qtee_supplicant/CMakeLists.txt
+@@ -24,6 +24,11 @@ if(BUILD_TA_AUTOLOAD_LISTENER)
+ 		PRIVATE -DTA_AUTOLOAD_LISTENER)
+ endif()
+ 
++if(PLUGIN_DIR)
++	target_compile_definitions(${PROJECT_NAME}
++		PRIVATE PLUGIN_PATH="${PLUGIN_DIR}/")
++endif()
++
+ if(BUILD_FS_LISTENER)
+ 	target_compile_definitions(${PROJECT_NAME}
+ 		PRIVATE -DFS_LISTENER)
+--- a/qtee_supplicant/src/listener_mngr.c
++++ b/qtee_supplicant/src/listener_mngr.c
+@@ -9,12 +9,17 @@
+ #include "listener_mngr.h"
+ 
+ #define MAX_LISTENERS 8
++
++#ifndef PLUGIN_PATH
++#define PLUGIN_PATH ""
++#endif
++
+ static struct listener_svc listeners[] = {
+ #ifdef TIME_LISTENER
+ 	{
+ 		.service_name = "Time service",
+ 		.is_registered = false,
+-		.file_name = "libtimeservice.so.1",
++		.file_name = PLUGIN_PATH "libtimeservice.so.1",
+ 		.lib_handle = NULL,
+ 	},
+ #endif
+@@ -22,7 +27,7 @@ static struct listener_svc listeners[] =
+ 	{
+ 		.service_name = "TA Autoload service",
+ 		.is_registered = false,
+-		.file_name = "libtaautoload.so.1",
++		.file_name = PLUGIN_PATH "libtaautoload.so.1",
+ 		.lib_handle = NULL,
+ 	},
+ #endif
+@@ -30,7 +35,7 @@ static struct listener_svc listeners[] =
+ 	{
+ 		.service_name = "FS service",
+ 		.is_registered = false,
+-		.file_name = "libfsservice.so.1",
++		.file_name = PLUGIN_PATH "libfsservice.so.1",
+ 		.lib_handle = NULL,
+ 	},
+ #endif
+@@ -38,7 +43,7 @@ static struct listener_svc listeners[] =
+ 	{
+ 		.service_name = "GPFS service",
+ 		.is_registered = false,
+-		.file_name = "libgpfsservice.so.1",
++		.file_name = PLUGIN_PATH "libgpfsservice.so.1",
+ 		.lib_handle = NULL,
+ 	},
+ #endif
+@@ -46,7 +51,7 @@ static struct listener_svc listeners[] =
+ 	{
+ 		.service_name = "rpmb service",
+ 		.is_registered = false,
+-		.file_name = "librpmbservice.so.1",
++		.file_name = PLUGIN_PATH "librpmbservice.so.1",
+ 		.lib_handle = NULL,
+ 	},
+ #endif

@@ -1,4 +1,4 @@
-usr/include/MinkCom.h
-usr/include/object.h
+usr/include/minkipc/MinkCom.h
+usr/include/minkipc/object.h
 usr/lib/*/libminkadaptor.so
 usr/lib/*/pkgconfig/minkadaptor.pc
