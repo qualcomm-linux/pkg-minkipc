@@ -1,0 +1,3 @@
+usr/include/tee_client_api.h
+usr/lib/*/libminkteec.so
+usr/lib/*/pkgconfig/minkteec.pc

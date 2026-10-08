@@ -46,20 +46,36 @@ Depends:
  ${misc:Depends},
  ${shlibs:Depends},
 
-Package: libminkipc-dev
+Package: libminkadaptor-dev
 Architecture: arm64
 Section: non-free/libdevel
-Description: QTEE shared libraries - development files
+Description: QTEE minkadaptor shared library - development files
  MinkIPC is Qualcomm's lightweight capability-based inter-process communication
  (IPC) framework. It enables secure, synchronous message passing across
  different security domains, like Linux user space to a Trusted Execution
  Environment, using unforgeable object references and transport mechanisms
  such as SMC, sockets, or TEE IOCTLs.
  .
- This package contains library headers and symlinks for the shared libraries
- shipped in the libminkadaptor0 and libminkteec1 packages.
+ This package contains the library headers, pkg-config file and symlink
+ for the shared library shipped in the libminkadaptor0 package.
 Depends:
  libminkadaptor0 (= ${binary:Version}),
+ ${misc:Depends},
+
+Package: libminkteec-dev
+Architecture: arm64
+Section: non-free/libdevel
+Description: QTEE minkteec shared library - development files
+ MinkIPC is Qualcomm's lightweight capability-based inter-process communication
+ (IPC) framework. It enables secure, synchronous message passing across
+ different security domains, like Linux user space to a Trusted Execution
+ Environment, using unforgeable object references and transport mechanisms
+ such as SMC, sockets, or TEE IOCTLs.
+ .
+ This package contains the GlobalPlatform TEE Client API header, pkg-config
+ file and symlink for the shared library shipped in the libminkteec1 package.
+Depends:
+ libminkadaptor-dev (= ${binary:Version}),
  libminkteec1 (= ${binary:Version}),
  ${misc:Depends},
 
