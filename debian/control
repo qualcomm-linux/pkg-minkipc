@@ -18,10 +18,11 @@ Package: libminkadaptor0
 Architecture: arm64
 Section: non-free/libs
 Description: QTEE minkadaptor shared library
- MinkIPC is Qualcomm’s lightweight capability-based inter-process communication (IPC) framework.
- It enables secure, synchronous message passing across different security domains—like Linux
- user space to Trusted Execution Environment—using unforgeable object references and transport
- mechanisms such as SMC, sockets, or TEE IOCTLs.
+ MinkIPC is Qualcomm's lightweight capability-based inter-process communication
+ (IPC) framework. It enables secure, synchronous message passing across
+ different security domains, like Linux user space to a Trusted Execution
+ Environment, using unforgeable object references and transport mechanisms
+ such as SMC, sockets, or TEE IOCTLs.
  .
  This package consists of the shared library libminkadaptor.
 Depends:
@@ -32,10 +33,11 @@ Package: libminkteec1
 Architecture: arm64
 Section: non-free/libs
 Description: QTEE minkteec shared library
- MinkIPC is Qualcomm’s lightweight capability-based inter-process communication (IPC) framework.
- It enables secure, synchronous message passing across different security domains—like Linux
- user space to Trusted Execution Environment—using unforgeable object references and transport
- mechanisms such as SMC, sockets, or TEE IOCTLs.
+ MinkIPC is Qualcomm's lightweight capability-based inter-process communication
+ (IPC) framework. It enables secure, synchronous message passing across
+ different security domains, like Linux user space to a Trusted Execution
+ Environment, using unforgeable object references and transport mechanisms
+ such as SMC, sockets, or TEE IOCTLs.
  .
  This package consists of the shared library libminkteec.
 Depends:
@@ -45,14 +47,15 @@ Depends:
 Package: libminkipc-dev
 Architecture: arm64
 Section: non-free/libdevel
-Description: QTEE shared libraries - devlopment files
- MinkIPC is Qualcomm’s lightweight capability-based inter-process communication (IPC) framework.
- It enables secure, synchronous message passing across different security domains—like Linux
- user space to Trusted Execution Environment—using unforgeable object references and transport
- mechanisms such as SMC, sockets, or TEE IOCTLs.
+Description: QTEE shared libraries - development files
+ MinkIPC is Qualcomm's lightweight capability-based inter-process communication
+ (IPC) framework. It enables secure, synchronous message passing across
+ different security domains, like Linux user space to a Trusted Execution
+ Environment, using unforgeable object references and transport mechanisms
+ such as SMC, sockets, or TEE IOCTLs.
  .
- This package contains library headers and symlinks for the shared libraries shipped in the
- libminkadaptor0 and libminkteec1 packages.
+ This package contains library headers and symlinks for the shared libraries
+ shipped in the libminkadaptor0 and libminkteec1 packages.
 Depends:
  libminkadaptor0 (= ${binary:Version}),
  libminkteec1 (= ${binary:Version}),
@@ -61,14 +64,15 @@ Depends:
 Package: minkipc-qteesupplicant
 Architecture: arm64
 Description: QTEE supplicant - support daemons and udev rules
- MinkIPC is Qualcomm’s lightweight capability-based inter-process communication (IPC) framework.
- It enables secure, synchronous message passing across different security domains—like Linux
- user space to Trusted Execution Environment—using unforgeable object references and transport
- mechanisms such as SMC, sockets, or TEE IOCTLs.
+ MinkIPC is Qualcomm's lightweight capability-based inter-process communication
+ (IPC) framework. It enables secure, synchronous message passing across
+ different security domains, like Linux user space to a Trusted Execution
+ Environment, using unforgeable object references and transport mechanisms
+ such as SMC, sockets, or TEE IOCTLs.
  .
- This package consists of the qteesupplicant and sfsconfig systemd services along with
- its necessary shared library internal to qteesupplicant. It includes udev rules as well
- for qteesupplicant to access QTEE.
+ This package consists of the qteesupplicant and sfsconfig systemd services
+ along with its necessary shared library internal to qteesupplicant. It
+ includes udev rules as well for qteesupplicant to access QTEE.
 Depends:
  ${misc:Depends},
  ${shlibs:Depends},
@@ -77,10 +81,11 @@ Package: minkipc-tools
 Architecture: arm64
 Section: non-free/utils
 Description: QTEE MinkIPC userspace tools
- MinkIPC is Qualcomm’s lightweight capability-based inter-process communication (IPC) framework.
- It enables secure, synchronous message passing across different security domains—like Linux
- user space to Trusted Execution Environment—using unforgeable object references and transport
- mechanisms such as SMC, sockets, or TEE IOCTLs.
+ MinkIPC is Qualcomm's lightweight capability-based inter-process communication
+ (IPC) framework. It enables secure, synchronous message passing across
+ different security domains, like Linux user space to a Trusted Execution
+ Environment, using unforgeable object references and transport mechanisms
+ such as SMC, sockets, or TEE IOCTLs.
  .
  This package consists of tools such as rpmb_client.
 Depends:
@@ -91,10 +96,11 @@ Package: minkipc-tests
 Architecture: arm64
 Section: non-free/devel
 Description: QTEE MinkIPC test binaries
- MinkIPC is Qualcomm’s lightweight capability-based inter-process communication (IPC) framework.
- It enables secure, synchronous message passing across different security domains—like Linux
- user space to Trusted Execution Environment—using unforgeable object references and transport
- mechanisms such as SMC, sockets, or TEE IOCTLs.
+ MinkIPC is Qualcomm's lightweight capability-based inter-process communication
+ (IPC) framework. It enables secure, synchronous message passing across
+ different security domains, like Linux user space to a Trusted Execution
+ Environment, using unforgeable object references and transport mechanisms
+ such as SMC, sockets, or TEE IOCTLs.
  .
  This package provides test binaries for validating MinkIPC functionality,
  including smcinvoke_client for SMC invocation testing and gp_test_client
