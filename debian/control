@@ -11,7 +11,7 @@ Build-Depends:
  libqcomtee-dev,
  mink-idl-compiler,
 Homepage: https://github.com/qualcomm/minkipc
-Vcs-Git: https://github.com/qualcomm-linux/pkg-minkipc -b qcom/debian/latest
+Vcs-Git: https://github.com/qualcomm-linux/pkg-minkipc.git
 Vcs-Browser: https://github.com/qualcomm-linux/pkg-minkipc
 
 Package: libminkadaptor0
