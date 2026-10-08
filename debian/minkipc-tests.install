@@ -1,2 +1,4 @@
 usr/bin/gp_test_client
 usr/bin/smcinvoke_client
+usr/share/man/man1/gp_test_client.1
+usr/share/man/man1/smcinvoke_client.1

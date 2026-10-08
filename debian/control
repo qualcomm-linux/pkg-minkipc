@@ -7,6 +7,7 @@ Section: non-free/misc
 Build-Depends:
  debhelper-compat (= 13),
  cmake,
+ help2man,
  libcbor-dev,
  libqcomtee-dev,
  mink-idl-compiler,
