@@ -11,6 +11,7 @@ Build-Depends:
  libcbor-dev,
  libqcomtee-dev,
  mink-idl-compiler,
+ pkgconf,
 Homepage: https://github.com/qualcomm/minkipc
 Vcs-Git: https://github.com/qualcomm-linux/pkg-minkipc.git
 Vcs-Browser: https://github.com/qualcomm-linux/pkg-minkipc
