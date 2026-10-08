@@ -4,7 +4,12 @@ Standards-Version: 4.6.2
 Section: misc
 Priority: optional
 Rules-Requires-Root: no
-Build-Depends: debhelper-compat (= 13), cmake, libcbor-dev, libqcomtee-dev, mink-idl-compiler
+Build-Depends:
+ debhelper-compat (= 13),
+ cmake,
+ libcbor-dev,
+ libqcomtee-dev,
+ mink-idl-compiler,
 Homepage: https://github.com/qualcomm/minkipc
 Vcs-Git: https://github.com/qualcomm-linux/pkg-minkipc -b qcom/debian/latest
 Vcs-Browser: https://github.com/qualcomm-linux/pkg-minkipc
@@ -19,7 +24,9 @@ Description: QTEE minkadaptor shared library
  mechanisms such as SMC, sockets, or TEE IOCTLs.
  .
  This package consists of the shared library libminkadaptor.
-Depends: ${misc:Depends}, ${shlibs:Depends}
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
 
 Package: libminkteec1
 Architecture: arm64
@@ -31,7 +38,9 @@ Description: QTEE minkteec shared library
  mechanisms such as SMC, sockets, or TEE IOCTLs.
  .
  This package consists of the shared library libminkteec.
-Depends: ${misc:Depends}, ${shlibs:Depends}
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
 
 Package: libminkipc-dev
 Architecture: arm64
@@ -44,7 +53,10 @@ Description: QTEE shared libraries - devlopment files
  .
  This package contains library headers and symlinks for the shared libraries shipped in the
  libminkadaptor0 and libminkteec1 packages.
-Depends: libminkadaptor0 (= ${binary:Version}), libminkteec1 (= ${binary:Version}), ${misc:Depends}
+Depends:
+ libminkadaptor0 (= ${binary:Version}),
+ libminkteec1 (= ${binary:Version}),
+ ${misc:Depends},
 
 Package: minkipc-qteesupplicant
 Architecture: arm64
@@ -57,7 +69,9 @@ Description: QTEE supplicant - support daemons and udev rules
  This package consists of the qteesupplicant and sfsconfig systemd services along with
  its necessary shared library internal to qteesupplicant. It includes udev rules as well
  for qteesupplicant to access QTEE.
-Depends: ${misc:Depends}, ${shlibs:Depends}
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
 
 Package: minkipc-tools
 Architecture: arm64
@@ -69,7 +83,9 @@ Description: QTEE MinkIPC userspace tools
  mechanisms such as SMC, sockets, or TEE IOCTLs.
  .
  This package consists of tools such as rpmb_client.
-Depends: ${misc:Depends}, ${shlibs:Depends}
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
 
 Package: minkipc-tests
 Architecture: arm64
@@ -83,4 +99,6 @@ Description: QTEE MinkIPC test binaries
  This package provides test binaries for validating MinkIPC functionality,
  including smcinvoke_client for SMC invocation testing and gp_test_client
  for GlobalPlatform TEE API conformance testing.
-Depends: ${misc:Depends}, ${shlibs:Depends}
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},

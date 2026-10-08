@@ -1,10 +1,10 @@
 usr/bin/qtee_supplicant
-usr/lib/*/libtimeservice.so.*
-usr/lib/*/libtaautoload.so.*
 usr/lib/*/libfsservice.so.*
 usr/lib/*/libgpfsservice.so.*
 usr/lib/*/librpmbservice.so.*
-usr/libexec/sfs_config
-usr/lib/udev/rules.d/99-qcomtee-udev.rules
+usr/lib/*/libtaautoload.so.*
+usr/lib/*/libtimeservice.so.*
 usr/lib/systemd/system/qteesupplicant.service
 usr/lib/systemd/system/sfsconfig.service
+usr/lib/udev/rules.d/99-qcomtee-udev.rules
+usr/libexec/sfs_config
