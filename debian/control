@@ -3,7 +3,7 @@ Maintainer: Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>
 Uploaders:
  Lukas Märdian <lukas.maerdian@oss.qualcomm.com>,
 Standards-Version: 4.6.2
-Section: misc
+Section: non-free/misc
 Build-Depends:
  debhelper-compat (= 13),
  cmake,
@@ -16,7 +16,7 @@ Vcs-Browser: https://github.com/qualcomm-linux/pkg-minkipc
 
 Package: libminkadaptor0
 Architecture: arm64
-Section: libs
+Section: non-free/libs
 Description: QTEE minkadaptor shared library
  MinkIPC is Qualcomm’s lightweight capability-based inter-process communication (IPC) framework.
  It enables secure, synchronous message passing across different security domains—like Linux
@@ -30,7 +30,7 @@ Depends:
 
 Package: libminkteec1
 Architecture: arm64
-Section: libs
+Section: non-free/libs
 Description: QTEE minkteec shared library
  MinkIPC is Qualcomm’s lightweight capability-based inter-process communication (IPC) framework.
  It enables secure, synchronous message passing across different security domains—like Linux
@@ -44,7 +44,7 @@ Depends:
 
 Package: libminkipc-dev
 Architecture: arm64
-Section: libdevel
+Section: non-free/libdevel
 Description: QTEE shared libraries - devlopment files
  MinkIPC is Qualcomm’s lightweight capability-based inter-process communication (IPC) framework.
  It enables secure, synchronous message passing across different security domains—like Linux
@@ -75,7 +75,7 @@ Depends:
 
 Package: minkipc-tools
 Architecture: arm64
-Section: utils
+Section: non-free/utils
 Description: QTEE MinkIPC userspace tools
  MinkIPC is Qualcomm’s lightweight capability-based inter-process communication (IPC) framework.
  It enables secure, synchronous message passing across different security domains—like Linux
@@ -89,7 +89,7 @@ Depends:
 
 Package: minkipc-tests
 Architecture: arm64
-Section: devel
+Section: non-free/devel
 Description: QTEE MinkIPC test binaries
  MinkIPC is Qualcomm’s lightweight capability-based inter-process communication (IPC) framework.
  It enables secure, synchronous message passing across different security domains—like Linux
