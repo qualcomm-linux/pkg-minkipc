@@ -20,5 +20,5 @@ execute_before_dh_installsystemd:
 	dh_installsysusers
 
 override_dh_installsystemd:
-	dh_installsystemd --name=qteesupplicant --no-start
-	dh_installsystemd --name=sfsonfig --no-start
+	dh_installsystemd -pminkipc-qteesupplicant --name=qteesupplicant --no-start
+	dh_installsystemd -pminkipc-qteesupplicant --name=sfsconfig --no-start
