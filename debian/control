@@ -1,5 +1,7 @@
 Source: minkipc
 Maintainer: Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>
+Uploaders:
+ Lukas Märdian <lukas.maerdian@oss.qualcomm.com>,
 Standards-Version: 4.6.2
 Section: misc
 Priority: optional
