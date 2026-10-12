@@ -22,8 +22,17 @@ minkipc (1.2.9-0qli+staging2~) UNRELEASED; urgency=medium
     - d/p/install-headers-under-minkipc.patch
     - d/p/listener-plugin-dir.patch
   * d/*.symbols: Add initial symbols files.
+  * d/gbp.conf: Add upstream-branch and debian-tag.
+  * Restrict SFS directory permissions as per upstream change.
+    - d/p/restrict-sfs-directory-permissions.patch
+    - d/p/sfs-config-set-owner.patch
+  * d/control: Update to libminkadaptor1.
+    - d/p/libminkadaptor-version-1.0.0.patch
+  * Fix pkg-config for libs in multiarch dirs.
+    - d/p/fix-pkgconfig-libdir.patch
+  * d/minkipc-qteesupplicant.sysuser: Use a restricted account.
 
- -- Lukas Märdian <lukas.maerdian@oss.qualcomm.com>  Thu, 08 Oct 2026 17:05:17 +0200
+ -- Lukas Märdian <lukas.maerdian@oss.qualcomm.com>  Mon, 12 Oct 2026 12:24:47 +0200
 
 minkipc (1.2.9-0qli+staging1) forky; urgency=medium
 
