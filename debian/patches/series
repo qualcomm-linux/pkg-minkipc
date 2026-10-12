@@ -1,2 +1,4 @@
 listener-plugin-dir.patch
 install-headers-under-minkipc.patch
+restrict-sfs-directory-permissions.patch
+sfs-config-set-owner.patch

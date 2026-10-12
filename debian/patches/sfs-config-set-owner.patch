@@ -1,0 +1,29 @@
+Description: qteesupplicant: give SFS storage directories to service user
+ The storage directories are only used by qtee_supplicant, which might
+ run as DISTRO_USER:DISTRO_GROUP, e.g. on QLI Debian. With the
+ world-writable bits dropped [1], make that user and group the owner of
+ the directories, as the service would not be able to write to them
+ otherwise. This is a no-op with the default of root:root.
+ .
+ [1] https://github.com/qualcomm/minkipc/pull/92 (follow-up)
+Author: Lukas Märdian <lukas.maerdian@oss.qualcomm.com>
+Forwarded: https://github.com/qualcomm/minkipc/pull/107
+Last-Update: 2026-10-12
+---
+--- a/qtee_supplicant/sfs_config.in
++++ b/qtee_supplicant/sfs_config.in
+@@ -15,12 +15,14 @@ if [ ! -d /var/lib/tee/qtee_supplicant ]
+     echo "Creating /var/lib/tee/qtee_supplicant"
+     mkdir -p /var/lib/tee/qtee_supplicant
+ fi
++chown @DISTRO_USER@:@DISTRO_GROUP@ /var/lib/tee/qtee_supplicant
+ chmod 755 /var/lib/tee/qtee_supplicant
+ 
+ if [ ! -d /var/lib/qtee_supplicant/vendor/tzstorage ]; then
+     echo "Creating /var/lib/qtee_supplicant/vendor/tzstorage"
+     mkdir -p /var/lib/qtee_supplicant/vendor/tzstorage
+ fi
++chown @DISTRO_USER@:@DISTRO_GROUP@ /var/lib/qtee_supplicant/vendor/tzstorage
+ chmod 755 /var/lib/qtee_supplicant/vendor/tzstorage
+ 
+ exit 0

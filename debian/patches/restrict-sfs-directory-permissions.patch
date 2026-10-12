@@ -1,0 +1,28 @@
+Description: qteesupplicant: restrict SFS directory permissions
+ Replace chmod o+rwx with chmod 755 in sfs_config.in, to drop the
+ world-writable bits on /var/lib/tee/qtee_supplicant and
+ /var/lib/qtee_supplicant/vendor/tzstorage.
+Author: Jiaxing Li <jiaxing.li@oss.qualcomm.com>
+Origin: upstream, https://github.com/qualcomm/minkipc/commit/7cbab3f474263d55e2bcd6f244e7217384aa24bb
+Bug: https://github.com/qualcomm/minkipc/issues/88
+Bug-Upstream: https://github.com/qualcomm-linux/meta-qcom/issues/2050
+Applied-Upstream: https://github.com/qualcomm/minkipc/pull/92, 7cbab3f474263d55e2bcd6f244e7217384aa24bb
+Last-Update: 2026-10-12
+---
+--- a/qtee_supplicant/sfs_config.in
++++ b/qtee_supplicant/sfs_config.in
+@@ -15,12 +15,12 @@ if [ ! -d /var/lib/tee/qtee_supplicant ]
+     echo "Creating /var/lib/tee/qtee_supplicant"
+     mkdir -p /var/lib/tee/qtee_supplicant
+ fi
+-chmod o+rwx /var/lib/tee/qtee_supplicant
++chmod 755 /var/lib/tee/qtee_supplicant
+ 
+ if [ ! -d /var/lib/qtee_supplicant/vendor/tzstorage ]; then
+     echo "Creating /var/lib/qtee_supplicant/vendor/tzstorage"
+     mkdir -p /var/lib/qtee_supplicant/vendor/tzstorage
+ fi
+-chmod o+rwx /var/lib/qtee_supplicant/vendor/tzstorage
++chmod 755 /var/lib/qtee_supplicant/vendor/tzstorage
+ 
+ exit 0
