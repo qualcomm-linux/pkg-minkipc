@@ -1,0 +1,23 @@
+Description: libminkadaptor: Set library version to 1.0.0
+ libminkadaptor declares VERSION 0.1.0 in its project() call, so it is
+ installed as libminkadaptor.so.0.1.0 with SONAME libminkadaptor.so.0.
+ All other shipped libraries in this repository (libminkteec,
+ libfsservice, libgpfsservice, librpmbservice, libtaautoload and
+ libtimeservice) use VERSION 1.0.0 and install as .so.1.
+ .
+ Bump libminkadaptor to 1.0.0 so it is consistent with the other
+ libraries and gets a stable SOVERSION of 1 for distribution packaging.
+Author: Ali Erdinc Koroglu <ali.koroglu@oss.qualcomm.com>
+Origin: upstream, https://github.com/qualcomm/minkipc/commit/a41e5d8af4e2d63bf8affaee947eccf72553ec16
+Applied-Upstream: https://github.com/qualcomm/minkipc/pull/95, a41e5d8af4e2d63bf8affaee947eccf72553ec16
+Last-Update: 2026-10-12
+---
+--- a/libminkadaptor/CMakeLists.txt
++++ b/libminkadaptor/CMakeLists.txt
+@@ -1,5 +1,5 @@
+ project(libminkadaptor
+-	VERSION 0.1.0
++	VERSION 1.0.0
+ 	LANGUAGES C ASM
+ )
+ 

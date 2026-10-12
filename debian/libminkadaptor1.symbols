@@ -1,4 +1,4 @@
-libminkadaptor.so.0 libminkadaptor0 #MINVER#
+libminkadaptor.so.1 libminkadaptor1 #MINVER#
 * Build-Depends-Package: libminkadaptor-dev
  MinkCom_getClientEnvObject@Base 1.2.9
  MinkCom_getClientEnvObjectWithCreds@Base 1.2.9

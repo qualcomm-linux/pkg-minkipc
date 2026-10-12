@@ -16,7 +16,7 @@ Homepage: https://github.com/qualcomm/minkipc
 Vcs-Git: https://github.com/qualcomm-linux/pkg-minkipc.git
 Vcs-Browser: https://github.com/qualcomm-linux/pkg-minkipc
 
-Package: libminkadaptor0
+Package: libminkadaptor1
 Architecture: arm64
 Section: non-free/libs
 Description: QTEE minkadaptor shared library
@@ -57,9 +57,9 @@ Description: QTEE minkadaptor shared library - development files
  such as SMC, sockets, or TEE IOCTLs.
  .
  This package contains the library headers, pkg-config file and symlink
- for the shared library shipped in the libminkadaptor0 package.
+ for the shared library shipped in the libminkadaptor1 package.
 Depends:
- libminkadaptor0 (= ${binary:Version}),
+ libminkadaptor1 (= ${binary:Version}),
  ${misc:Depends},
 
 Package: libminkteec-dev

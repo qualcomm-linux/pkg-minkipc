@@ -11,7 +11,7 @@ and transport mechanisms including SMC calls, sockets, and TEE IOCTLs.
 Packages
 --------
 
-libminkadaptor0
+libminkadaptor1
   Shared library that implements the userspace MinkIPC interface.  It
   provides the low-level Object_invoke transport layer used to communicate
   with QTEE via the QCOM-TEE driver registered with the Linux TEE subsystem.
@@ -24,7 +24,7 @@ libminkteec1
 
 libminkadaptor-dev
   Development headers (object.h, MinkCom.h), pkg-config file and linker
-  symlink for libminkadaptor0.
+  symlink for libminkadaptor1.
 
 libminkteec-dev
   Development header (tee_client_api.h), pkg-config file and linker symlink
