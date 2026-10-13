@@ -94,6 +94,8 @@ Description: QTEE supplicant - support daemons and udev rules
 Depends:
  ${misc:Depends},
  ${shlibs:Depends},
+Recommends:
+ qtee-tas,
 
 Package: minkipc-tools
 Architecture: arm64
