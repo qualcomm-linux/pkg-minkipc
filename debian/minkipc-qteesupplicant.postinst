@@ -1,0 +1,16 @@
+#!/bin/sh
+set -e
+
+#DEBHELPER#
+
+if [ "$1" = configure ] && [ -d /run/systemd/system ] && command -v udevadm >/dev/null 2>&1; then
+    # Apply the new rules to devices that already exist, so that the supplicant
+    # starts without a reboot. This runs after #DEBHELPER# so that the
+    # _securemsm group created by sysusers exists when the rules are applied.
+    udevadm control --reload || true
+    for subsys in tee bsg mmc_rpmb; do
+        udevadm trigger --action=add --subsystem-match="$subsys" || true
+    done
+fi
+
+exit 0
