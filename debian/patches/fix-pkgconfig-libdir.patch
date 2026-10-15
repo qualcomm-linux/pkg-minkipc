@@ -1,0 +1,28 @@
+Description: pkg-config: Use CMAKE_INSTALL_LIBDIR for libdir
+ The libraries are installed to ${CMAKE_INSTALL_LIBDIR}, which is a
+ multiarch directory on Debian, but the pkg-config files point libdir to
+ ${prefix}/lib.
+Author: Lukas Märdian <lukas.maerdian@oss.qualcomm.com>
+Forwarded: https://github.com/qualcomm/minkipc/pull/97 (as review comment)
+Last-Update: 2026-10-12
+---
+--- a/libminkadaptor/minkadaptor.pc.in
++++ b/libminkadaptor/minkadaptor.pc.in
+@@ -1,6 +1,6 @@
+ prefix="@CMAKE_INSTALL_PREFIX@"
+ exec_prefix="${prefix}"
+-libdir="${prefix}/lib"
++libdir="${prefix}/@CMAKE_INSTALL_LIBDIR@"
+ includedir="${prefix}/@CMAKE_INSTALL_INCLUDEDIR@"
+ 
+ Name: @PROJECT_NAME@
+--- a/libminkteec/minkteec.pc.in
++++ b/libminkteec/minkteec.pc.in
+@@ -1,6 +1,6 @@
+ prefix="@CMAKE_INSTALL_PREFIX@"
+ exec_prefix="${prefix}"
+-libdir="${prefix}/lib"
++libdir="${prefix}/@CMAKE_INSTALL_LIBDIR@"
+ includedir="${prefix}/@CMAKE_INSTALL_INCLUDEDIR@"
+ 
+ Name: @PROJECT_NAME@

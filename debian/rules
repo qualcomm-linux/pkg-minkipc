@@ -1,5 +1,10 @@
 #!/usr/bin/make -f
 
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+include /usr/share/dpkg/architecture.mk
+include /usr/share/dpkg/pkg-info.mk
+
 %:
 	dh $@ --buildsystem=cmake
 
@@ -9,10 +14,39 @@ override_dh_auto_configure:
 	-DSYSTEMD_UNIT_DIR=/usr/lib/systemd/system \
 	-DUDEV_DIR=/usr/lib/udev/rules.d \
 	-DBUILD_UNITTEST=TRUE \
-	-DDISTRO_USER=securemsm \
-	-DDISTRO_GROUP=securemsm \
-	-DBUILD_PKCS11=OFF
+	-DDISTRO_USER=_securemsm \
+	-DDISTRO_GROUP=_securemsm \
+	-DBUILD_PKCS11=OFF \
+	-DPLUGIN_DIR=/usr/lib/$(DEB_HOST_MULTIARCH)/qtee-supplicant
+
+# Not part of the default dh sequence before compat 14.
+execute_before_dh_installsystemd:
+	dh_installsysusers
+
+# The listener plugins are private to qtee_supplicant: no shlibs, no ldconfig.
+override_dh_makeshlibs:
+	dh_makeshlibs -Nminkipc-qteesupplicant
+
+# qtee_supplicant ignores its arguments and would start the daemon, so it has
+# a hand-written manual page. The other tools can describe themselves.
+execute_after_dh_auto_install:
+	mkdir -p debian/tmp/usr/share/man/man1
+	LD_LIBRARY_PATH=$(CURDIR)/debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH) \
+	help2man --no-info --version-string=$(DEB_VERSION_UPSTREAM) \
+	  --name="provision or erase the RPMB partition for QTEE" \
+	  --output=debian/tmp/usr/share/man/man1/rpmb_client.1 \
+	  debian/tmp/usr/bin/rpmb_client
+	LD_LIBRARY_PATH=$(CURDIR)/debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH) \
+	help2man --no-info --version-string=$(DEB_VERSION_UPSTREAM) \
+	  --name="run GlobalPlatform TEE Client API tests against QTEE" \
+	  --output=debian/tmp/usr/share/man/man1/gp_test_client.1 \
+	  debian/tmp/usr/bin/gp_test_client
+	LD_LIBRARY_PATH=$(CURDIR)/debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH) \
+	help2man --no-info --version-string=$(DEB_VERSION_UPSTREAM) \
+	  --name="run MinkIPC SMC invocation tests against QTEE" \
+	  --output=debian/tmp/usr/share/man/man1/smcinvoke_client.1 \
+	  debian/tmp/usr/bin/smcinvoke_client
 
 override_dh_installsystemd:
-	dh_installsystemd --name=qteesupplicant --no-start
-	dh_installsystemd --name=sfsonfig --no-start
+	dh_installsystemd -pminkipc-qteesupplicant --name=qteesupplicant --no-start
+	dh_installsystemd -pminkipc-qteesupplicant --name=sfsconfig --no-start

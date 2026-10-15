@@ -1,0 +1,11 @@
+libminkadaptor.so.1 libminkadaptor1 #MINVER#
+* Build-Depends-Package: libminkadaptor-dev
+ MinkCom_getClientEnvObject@Base 1.2.9
+ MinkCom_getClientEnvObjectWithCreds@Base 1.2.9
+ MinkCom_getMemoryObject@Base 1.2.9
+ MinkCom_getMemoryObjectInfo@Base 1.2.9
+ MinkCom_getRootEnvObject@Base 1.2.9
+ mink_recv_ioctl@Base 1.2.9
+ mink_recv_skip@Base 1.2.9
+ mink_recv_svc@Base 1.2.9
+ supplicant_start@Base 1.2.9

@@ -1,0 +1,15 @@
+# The upstream source tree ships signed, pre-built QTEE Trusted Applications
+# (ta/ and the QTVM test TA). They are not used by the build and are not
+# installed in any binary package, see the Disclaimer in debian/copyright.
+source-contains-prebuilt-binary [ta/*/*.mbn]
+source-contains-prebuilt-binary [mink_platform/mink_test/qtvm_test/prebuilt_qtee_ta/*.mbn]
+source-is-missing [ta/*/*.mbn]
+source-is-missing [mink_platform/mink_test/qtvm_test/prebuilt_qtee_ta/*.mbn]
+
+# Pre-built x86-64 builds of the Mink IDL compiler, for use by the QTVM SDK
+# Makefiles. The build uses the mink-idl-compiler package instead, which is
+# built from the sources of that compiler.
+source-contains-prebuilt-binary [libmink/SDK/QTVM/minkidl]
+source-contains-prebuilt-binary [libmink/SDK/QTVM/idl/minkidl]
+source-is-missing [libmink/SDK/QTVM/minkidl]
+source-is-missing [libmink/SDK/QTVM/idl/minkidl]
