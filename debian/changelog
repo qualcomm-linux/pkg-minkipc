@@ -1,8 +1,9 @@
 minkipc (1.2.9-0qli2~bpo13+1~) UNRELEASED; urgency=medium
 
-  * Unreleased changes
+  * Rebuild for trixie.
+  * d/gbp.conf: Update for trixie/QLI.
 
- -- Debusine Action GitHub Bot <noreply@bot.invalid>  Mon, 03 Aug 2026 10:18:15 +0000
+ -- Lukas Märdian <lukas.maerdian@oss.qualcomm.com>  Thu, 15 Oct 2026 09:28:42 +0200
 
 minkipc (1.2.9-0qli2) forky; urgency=medium
 
@@ -63,7 +64,7 @@ minkipc (1.2.9-0qli+staging1~bpo13+1) trixie; urgency=medium
   [ Abhinaba Rakshit ]
   * Rebuild for trixie.
 
- -- Debusine Action GitHub Bot <noreply@bot.invalid>  Mon, 03 Aug 2026 10:16:00 +0000
+ -- Debusine Action Bot <noreply@bot.invalid>  Mon, 03 Aug 2026 10:16:00 +0000
 
 minkipc (1.2.9-0qli+staging1) forky; urgency=medium
 
@@ -74,18 +75,18 @@ minkipc (1.2.9-0qli+staging1) forky; urgency=medium
   * Add minkipc-tools and minkipc-tests packages
   * Add README.debian file
 
- -- Debusine Action GitHub Bot <noreply@bot.invalid>  Mon, 03 Aug 2026 09:40:06 +0000
+ -- Debusine Action Bot <noreply@bot.invalid>  Mon, 03 Aug 2026 09:40:06 +0000
 
 minkipc (1.2.6-0qli+staging1~bpo13+1) trixie; urgency=medium
 
   [ Agathe Porte ]
   * Rebuild for trixie.
 
- -- root <root@f9d714ec4acc>  Fri, 03 Jul 2026 09:20:38 +0000
+ -- Debusine Action Bot <noreply@bot.invalid>  Fri, 03 Jul 2026 09:20:38 +0000
 
 minkipc (1.2.6-0qli+staging1) forky; urgency=medium
 
   [ Agathe Porte ]
   * Initial upload
 
- -- Debusine Action GitHub Bot <noreply@bot.invalid>  Fri, 03 Jul 2026 09:12:12 +0000
+ -- Debusine Action Bot <noreply@bot.invalid>  Fri, 03 Jul 2026 09:12:12 +0000
